@@ -1,6 +1,11 @@
 #include <math.h>
 
 
+// TODO: Use the ParityWidth to mask/shift parity bits and control recursion depth
+//       so that a user can calculate parity over multiple equally sized Parity
+//       groups at once.
+//       i.e. Parity<16>::calc(uint16_t(0xfeff))     ->  0b1
+//       i.e. Parity<16, 2>::calc(uint16_t(0xfeff))  ->  0b10
 template <unsigned DataWidth, unsigned ParityWidth = 1, unsigned DataShift = 1>
 struct Parity {
   // Unsigned precision can be calculated as 1 plus the log base 2 of -1
