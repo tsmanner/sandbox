@@ -30,24 +30,24 @@ struct Parity<DataWidth, ParityWidth, DataShift, typename std::enable_if<(DataWi
   //   number of bits parity is being calculated over.
   template <typename DataType>
   static inline typename std::enable_if<(DataWidth < std::numeric_limits<DataType>::digits and ParityWidth == 1), DataType>::type
-  even(const DataType& data) { return _calc(data & DataMask<DataType>::value) & 1; }
+  even(const DataType& data) { return _even(data & DataMask<DataType>::value) & 1; }
 
   // Non-masking calc implementation
   //   Input data does not need to be masked if the precision is equal to the
   //   number of bits parity is being calculated over.
   template <typename DataType>
   static inline typename std::enable_if<(DataWidth == std::numeric_limits<DataType>::digits and ParityWidth == 1), DataType>::type
-  even(const DataType& data) { return _calc(data) & 1; }
+  even(const DataType& data) { return _even(data) & 1; }
 
   // Calculate each step of the parity with a cascading XOR, accumulating
   // partial parity bits in every 2^Nth bit, until 2^N > DataWidth.
   template <typename DataType>
   static inline typename std::enable_if<((DataWidth / ParityWidth) > DataShift), DataType>::type
-  _calc(const DataType& data) { return Parity<DataWidth, ParityWidth, DataShift * 2>::_calc(data ^ (data >> DataShift)); }
+  _even(const DataType& data) { return Parity<DataWidth, ParityWidth, DataShift * 2>::_even(data ^ (data >> DataShift)); }
 
   // End template recursion
   template <typename DataType>
   static inline typename std::enable_if<((DataWidth / ParityWidth) <= DataShift), DataType>::type
-  _calc(const DataType& data) { return data; }
+  _even(const DataType& data) { return data; }
 
 };
