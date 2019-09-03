@@ -17,8 +17,7 @@ struct Parity<DataWidth, ParityWidth, DataShift, typename std::enable_if<(DataWi
 
   // Odd parity is just the inverse of even parity
   template <typename DataType>
-  static inline typename std::enable_if<(ParityWidth > 1), DataType>::type
-  odd(const DataType& data) { return ParityMask<DataType>::value & ~even(data); }
+  static inline DataType odd(const DataType& data) { return ParityMask<DataType>::value & ~even(data); }
 
   // Multi-bit even parity implementation. Uses template recursion to eventually call single bit
   // parity on each parity group, ORing in other parity bits shifted left 1 at a time.
