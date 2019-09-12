@@ -1,5 +1,6 @@
 #include <limits>
 #include <math.h>
+#include <type_traits>
 
 
 // To use `enable_if` with a struct, we have to fudge a partial specialization of the template.
