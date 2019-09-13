@@ -1,5 +1,8 @@
+#ifndef Parity_h
+#define Parity_h
+
+
 #include <limits>
-#include <math.h>
 #include <type_traits>
 
 
@@ -52,3 +55,6 @@ struct Parity<DataWidth, ParityWidth, DataShift, typename std::enable_if<(DataWi
   _even(const DataType& data) { return data; }
 
 };
+
+
+#endif
