@@ -13,6 +13,8 @@ install:
   - get-deps
 
 matrix:
+  script: cd cpp/Parity && $CXX --std=c++11 Main.cpp -o unittest.out && ./unittest.out
+
   include:
     # works on Precise and Trusty
     - os: linux
@@ -80,5 +82,3 @@ matrix:
 
 before_install:
     - eval "${MATRIX_EVAL}"
-
-script: cd cpp/Parity && $CXX --std=c++11 Main.cpp -o unittest.out && ./unittest.out
