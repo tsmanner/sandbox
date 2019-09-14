@@ -1,16 +1,16 @@
 language: c++
 
-compiler:
-  - clang
-  - gcc
+# compiler:
+#   - clang
+#   - gcc
 
 branches:
   only:
     - travis-setup
 
-install:
-  - make
-  - get-deps
+# install:
+#   - make
+#   - get-deps
 
 matrix:
   script: cd cpp/Parity && $CXX --std=c++11 Main.cpp -o unittest.out && ./unittest.out
