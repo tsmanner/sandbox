@@ -74,5 +74,5 @@ matrix:
     #     - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8 && CXX_STD=c++11"
 
 before_install:
-  - curl https://nixos.org/nix/install | sh
+  - curl https://nixos.org/nix/install | sh && . /home/travis/.nix-profile/etc/profile.d/nix.sh
   - eval "${MATRIX_EVAL}"
