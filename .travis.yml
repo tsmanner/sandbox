@@ -4,6 +4,10 @@ compiler:
   - clang
   - gcc
 
+branches:
+  only:
+    - travis-setup
+
 install:
   - make
   - get-deps
