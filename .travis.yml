@@ -1,5 +1,7 @@
 language: c++
 
+script: cd cpp/Parity && $CXX --std=c++11 Main.cpp -o unittest.out && ./unittest.out
+
 # compiler:
 #   - clang
 #   - gcc
@@ -13,8 +15,6 @@ branches:
 #   - get-deps
 
 matrix:
-  script: cd cpp/Parity && $CXX --std=c++11 Main.cpp -o unittest.out && ./unittest.out
-
   include:
     # works on Precise and Trusty
     - os: linux
