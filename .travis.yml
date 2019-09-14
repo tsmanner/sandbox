@@ -5,6 +5,7 @@ script: cd cpp/Parity && $CXX --std=$CXX_STD Main.cpp -o unittest.out && ./unitt
 branches:
   only:
     - master
+    - travis-setup
 
 matrix:
   include:
@@ -73,4 +74,5 @@ matrix:
     #     - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8 && CXX_STD=c++11"
 
 before_install:
-    - eval "${MATRIX_EVAL}"
+  - curl https://nixos.org/nix/install | sh
+  - eval "${MATRIX_EVAL}"
