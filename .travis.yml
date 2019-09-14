@@ -26,7 +26,7 @@ matrix:
           packages:
             - clang-3.5
       env:
-         - MATRIX_EVAL="CC=clang-3.5 && CXX=lang++-3.5 && CXX_STD=c++11"
+         - MATRIX_EVAL="CC=clang-3.5 && CXX=clang++-3.5 && CXX_STD=c++11"
 
     # # works on Precise and Trusty
     # - os: linux
