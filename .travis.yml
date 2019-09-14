@@ -1,20 +1,14 @@
 language: c++
 
-compiler:
-  - clang
-  - gcc
+script: cd cpp/Parity && $CXX --std=$CXX_STD Main.cpp -o unittest.out && ./unittest.out
 
 branches:
   only:
     - travis-setup
 
-install:
-  - make
-  - get-deps
-
 matrix:
   include:
-    # works on Precise and Trusty
+    # C++11 (GCC 4.8, Clang 3.5)
     - os: linux
       addons:
         apt:
@@ -23,16 +17,16 @@ matrix:
           packages:
             - g++-4.8
       env:
-         - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
+         - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8 && CXX_STD=c++11"
     - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - clang-3.3
+            - clang-3.5
       env:
-         - MATRIX_EVAL="CC=clang-3.3 && CXX=lang++-3.3"
+         - MATRIX_EVAL="CC=clang-3.5 && CXX=clang++-3.5 && CXX_STD=c++11"
 
     # # works on Precise and Trusty
     # - os: linux
@@ -43,7 +37,7 @@ matrix:
     #       packages:
     #         - g++-5
     #   env:
-    #      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+    #      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CXX_STD=c++11"
 
     # # works on Precise and Trusty
     # - os: linux
@@ -54,7 +48,7 @@ matrix:
     #       packages:
     #         - g++-6
     #   env:
-    #     - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+    #     - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6 && CXX_STD=c++11"
 
     # # works on Precise and Trusty
     # - os: linux
@@ -65,7 +59,7 @@ matrix:
     #       packages:
     #         - g++-7
     #   env:
-    #     - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    #     - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7 && CXX_STD=c++11"
 
     # # works on Precise and Trusty
     # - os: linux
@@ -76,9 +70,7 @@ matrix:
     #       packages:
     #         - g++-8
     #   env:
-    #     - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+    #     - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8 && CXX_STD=c++11"
 
 before_install:
     - eval "${MATRIX_EVAL}"
-
-script: cd cpp/Parity && $CXX --std=c++11 Main.cpp -o unittest.out && ./unittest.out
