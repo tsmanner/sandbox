@@ -44,14 +44,10 @@ single_bit_parity_test_pattern() {
   constexpr DataType test_value_1 = (DataType(1) << BIT) | 1;
   // Create the test value with a `0` in the LSB
   constexpr DataType test_value_0 = (DataType(1) << BIT) & ~DataType(1);
-  // std::cout << "TestValue0 " << std::bitset<BITS>(test_value_0) << std::endl;
-  // std::cout << "TestValue1 " << std::bitset<BITS>(test_value_1) << std::endl;
   // Test `0` LSB
   REQUIRE( Parity<BITS>::even(test_value_0) == 1 );
-  REQUIRE( Parity<BITS>::odd(test_value_0)  == 0 );
   // Test `1` LSB
   REQUIRE( Parity<BITS>::even(test_value_1) == 0 );
-  REQUIRE( Parity<BITS>::odd(test_value_1)  == 1 );
   // Make the template recursive call to check the next bit
   single_bit_parity_test_pattern<DataType, BITS, (BIT + 1)>();
 }
@@ -64,14 +60,10 @@ single_bit_parity_test_pattern() {
   constexpr DataType test_value_0 = DataType(0);
   // Create the test value `1`
   constexpr DataType test_value_1 = DataType(1);
-  // std::cout << "TestValue0 " << std::bitset<BITS>(test_value_0) << std::endl;
-  // std::cout << "TestValue1 " << std::bitset<BITS>(test_value_1) << std::endl;
   // Test `0`
   REQUIRE( Parity<BITS>::even(test_value_0) == 0 );
-  REQUIRE( Parity<BITS>::odd(test_value_0)  == 1 );
   // Test `1`
   REQUIRE( Parity<BITS>::even(test_value_1) == 1 );
-  REQUIRE( Parity<BITS>::odd(test_value_1)  == 0 );
   // Make the template recursive call to check the next bit
   single_bit_parity_test_pattern<DataType, BITS, (BIT + 1)>();
 }
@@ -85,6 +77,10 @@ TEST_CASE("uint16_t 16to1", "[even][uint16_t][parity width 1][size aligned]") { 
 TEST_CASE("uint32_t 17to1", "[even][uint32_t][parity width 1]") {               single_bit_parity_test_pattern<uint32_t, 17>(); }
 TEST_CASE("uint32_t 32to1", "[even][uint32_t][parity width 1][size aligned]") { single_bit_parity_test_pattern<uint32_t, 32>(); }
 
+TEST_CASE("parity mask", "[even]") {
+  // Introduce an out-of-bounds 1 to make sure it isn't used
+  REQUIRE( Parity<4>::even(0b10001) == 1 );
+}
 
 /*
  * Test Odd Parity
@@ -102,9 +98,4 @@ TEST_CASE("odd parity 2", "[odd][parity width 2]") {
   REQUIRE( (~(Parity<8, 2>::even(0b00000001)) & 3) == Parity<8, 2>::odd(0b00000001) );
   REQUIRE( (~(Parity<8, 2>::even(0b00010000)) & 3) == Parity<8, 2>::odd(0b00010000) );
   REQUIRE( (~(Parity<8, 2>::even(0b00010001)) & 3) == Parity<8, 2>::odd(0b00010001) );
-}
-
-TEST_CASE("parity mask", "[even]") {
-  // Introduce an out-of-bounds 1 to make sure it isn't used
-  REQUIRE( Parity<4>::even(0b10001) == 1 );
 }
