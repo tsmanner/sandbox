@@ -28,6 +28,9 @@ let
         lib
         catch
       ];
+      flags = [
+        "--std=c++11"
+      ];
     };
 
     # Execution of the test executable
