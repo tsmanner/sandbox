@@ -1,11 +1,11 @@
-{lib, pkgs}:
+{lib, pkgs, support}:
 
 let
 
   callPackage = pkgs.lib.callPackageWith (pkgs // self);
 
   self = rec {
-
+    inherit support;
     resolve_gcc_pkg = gccname: pkgs."${gccname}";
 
     build_function = package_name: source_root: gcc_version: source_files: include_paths:
@@ -29,12 +29,11 @@ let
     ;
 
 
-    catch = callPackage ./_Catch2_ {};
+    catch = callPackage ./catch {};
 
     parity = callPackage ./Parity {};
-    parity_test = callPackage ./Parity/tests.nix {};
 
-    # cppDistributionNetwork = callPackage ./cpp/DistributionNetwork {};
+    # DistributionNetwork = callPackage ./DistributionNetwork {};
 
   };
 
