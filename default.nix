@@ -6,10 +6,10 @@ let
   self = rec {
     cpp = callPackage ./cpp {};
 
-    cppCatch = callPackage ./cpp/_Catch2_ {};
+    # cppCatch = callPackage ./cpp/_Catch2_ {};
 
-    cppParity = callPackage ./cpp/Parity {};
-    cppParityTest = callPackage ./cpp/Parity/tests.nix {};
+    # cppParity = callPackage ./cpp/Parity {};
+    # cppParityTest = callPackage ./cpp/Parity/tests.nix {};
 
     # cppDistributionNetwork = callPackage ./cpp/DistributionNetwork {};
 

@@ -1,7 +1,7 @@
-{cpp, cppCatch}:
+{build_functions, catch}:
 
-cpp.build_functions {
-  inherit cppCatch;
+build_functions {
+  inherit catch;
   package_name = "Parity";
   source_root = ./.;
   source_files = [
@@ -12,6 +12,6 @@ cpp.build_functions {
     "gcc8"
   ];
   include_paths = [
-    cppCatch.src
+    catch
   ];
 }

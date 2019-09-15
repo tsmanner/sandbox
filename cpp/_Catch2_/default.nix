@@ -3,6 +3,6 @@
 pkgs.stdenv.mkDerivation {
     name = "Catch";
     system = builtins.currentSystem;
-    buildCommand = "";
     src = ./.;
+    buildCommand = "mkdir $out && cp $src/catch.hpp $out/catch.hpp";
 }
