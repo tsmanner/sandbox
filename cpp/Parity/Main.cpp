@@ -7,7 +7,8 @@
 #include "Parity.h"
 
 #define CATCH_CONFIG_MAIN
-#include "../_Catch2_/catch.hpp"
+// #include "../_Catch2_/catch.hpp"
+#include "catch.hpp"
 
 
 /*

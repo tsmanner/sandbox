@@ -1,3 +1,11 @@
+# VS Code
 .vscode/
 
+# C++ Binaries
 *.out
+*.dll
+*.a
+*.so
+
+# NIX
+result*
