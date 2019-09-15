@@ -1,5 +1,3 @@
-language: c++
-
 branches:
   only:
     - master
@@ -8,4 +6,6 @@ branches:
 before_install:
   - curl https://nixos.org/nix/install | sh && . /home/travis/.nix-profile/etc/profile.d/nix.sh
 
-script: nix-build -j 4 -k -A cppParityTest
+matrix:
+  - name: "parity"
+    script: nix-build --show-trace -j 4 -k -A cpp.parity.test
