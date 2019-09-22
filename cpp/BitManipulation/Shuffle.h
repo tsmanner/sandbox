@@ -1,60 +1,52 @@
 #ifndef Shuffle_h
 #define Shuffle_h
 
-#include <tuple>
 #include <type_traits>
 
-#include <iostream>
 
 template <int... INDICES>
 class Shuffle {
 public:
 
-  //
-  // Shuffle <0, 1, 2>
-  //
-  // tmp = [2]
-  // [2] = [1]
-  // [1] = [0]
-  // [0] = tmp
-  //
-  // Template Function Structure
-  //
-  // template <int FIRST, int... REMAINING, int LAST> EntryFunction(t)
-  //   tmp = std::get<LAST>(t)
-  //   IterativeFunction<BitStringType, FIRST, REMAINING..., LAST>(t)
-  //   std::get<FIRST>(t) = tmp
-  //
-  // template <int CURRENT, int NEXT, int... REMAINING> IterativeFunction(t)
-  //   IterativeFunction<NEXT, REMAINING>(t)
-  //   std::get<NEXT>(t) = std::get<CURRENT>(t)
+  // Helper method to return the first element of a template
+  // parameter pack.  Used by _query
+  template <int I, int... Is>
+  static constexpr int get_first() { return I; }
 
-  template <typename BitStringType, int CURRENT, int NEXT, int...REMAINING>
-  static typename std::enable_if<(sizeof...(REMAINING) == 0)>::type
-  IterativeFunction(BitStringType& bitstring) {
-    std::get<NEXT>(bitstring) = std::get<CURRENT>(bitstring);
-  }
+  // Terminal function for the case where the query index
+  // is found somewhere in the middle of INDICES
+  template <int QUERY, int FIRST, int I, int... Is>
+  static constexpr typename std::enable_if<(QUERY == I and sizeof...(Is) != 0), int>::type
+  _query() { return get_first<Is...>(); }
 
-  template <typename BitStringType, int CURRENT, int NEXT, int...REMAINING>
-  static typename std::enable_if<(sizeof...(REMAINING) != 0)>::type
-  IterativeFunction(BitStringType& bitstring) {
-    IterativeFunction<BitStringType, NEXT, REMAINING...>(bitstring);
-    std::get<NEXT>(bitstring) = std::get<CURRENT>(bitstring);
-  }
+  // Terminal function for the case where the query index
+  // is the last I in INDICES
+  template <int QUERY, int FIRST, int I, int... Is>
+  static constexpr typename std::enable_if<(QUERY == I and sizeof...(Is) == 0), int>::type
+  _query() { return FIRST; }
 
-  template <typename BitStringType, int FIRST, int... REMAINING>
-  static void
-  EntryFunction(BitStringType& bitstring) {
-    auto tmp = std::get<sizeof...(REMAINING)>(bitstring);
-    IterativeFunction<BitStringType, FIRST, REMAINING...>(bitstring);
-    std::get<FIRST>(bitstring) = tmp;
-  }
+  // Terminal function for the case where the query index
+  // is not in INDICES
+  template <int QUERY, int FIRST, int I, int... Is>
+  static constexpr typename std::enable_if<(QUERY != I and sizeof...(Is) == 0), int>::type
+  _query() { return QUERY; }
 
-  template <typename BitStringType>
-  static BitStringType
-  apply(BitStringType bitstring) {
-    EntryFunction<BitStringType, INDICES...>(bitstring);
-    return bitstring;
+  // Recursive query function that scans the INDICES
+  // for the QUERY index
+  template <int QUERY, int FIRST, int I, int... Is>
+  static constexpr typename std::enable_if<(QUERY != I and sizeof...(Is) != 0), int>::type
+  _query() { return _query<QUERY, FIRST, Is...>(); }
+
+  // First query, duplicates FIRST so that we can hold
+  // onto it, just in case QUERY is the last element in INDICES
+  template <int QUERY, int FIRST, int... Is>
+  static constexpr int
+  _start_query() { return _query<QUERY, FIRST, FIRST, Is...>(); }
+
+  // Entry point function, templated only with the index to look up
+  template <int QUERY>
+  static constexpr int query() {
+    return _start_query<QUERY, INDICES...>();
   }
 
 };

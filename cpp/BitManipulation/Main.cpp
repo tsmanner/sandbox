@@ -8,13 +8,12 @@ using std::endl;
 using std::hex;
 
 
-// #include "Bitstreaming.h"
-#include "Bit.h"
 #include "Shuffle.h"
 #include "Interleave.h"
-#include "Scramble.h"
+#include "BitRange.h"
 
-// #include "catch.hpp"
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
 
 
 template <int I, typename... Types>
@@ -34,71 +33,50 @@ std::ostream& stream(std::ostream& os, std::tuple<Types...> t) {
 }
 
 
+//
+// Interleave
+//   Interleaves a slice of a bit-range N-ways
+//
 
-int main() {
-  // cout << Bitstreaming<0, 0>().length() << endl;
-  // cout << Bitstreaming<0, 1>().length() << endl;
-  // cout << Bitstreaming<1, 0>().length() << endl;
+// Simple 4-bit interleave test pattern
+// abcd -> acbd
+// 0123 -> 0213
+TEST_CASE("Query Interleave", "[interleave][query]") {
+  REQUIRE(Interleave<0, 3, 2>::query<0>() == 0);
+  REQUIRE(Interleave<0, 3, 2>::query<1>() == 2);
+  REQUIRE(Interleave<0, 3, 2>::query<2>() == 1);
+  REQUIRE(Interleave<0, 3, 2>::query<3>() == 3);
+}
 
-  // cout << Bit<0, 3>::shift() << endl;
-  // // 0 -> 3 -> 1
-  // // Final shift amount is 1 (1 - 0)
-  // cout << Bit<0, 3, 1>::shift() << endl;
 
-  // auto bits = std::make_tuple('0', '1', '2', '3');
-  // auto shuffled = Shuffle<0, 1, 2>::apply(bits);
-  // auto shuffled = Interleave<2>::apply(bits);
+//
+// Shuffle
+//   Rotates bits through a variadic list of indices
+//
 
-  // stream(cout, bits) << endl;
-  // stream(cout, shuffled) << endl;
+// Simple 4-bit shuffle test pattern
+// 3 -> 0 -> 1 -> 3
+// 2 unchanged
+TEST_CASE("Query Shuffle", "[shuffle][query]") {
+  REQUIRE(Shuffle<3, 0, 1>::query<0>() == 1);
+  REQUIRE(Shuffle<3, 0, 1>::query<1>() == 3);
+  REQUIRE(Shuffle<3, 0, 1>::query<2>() == 2);
+  REQUIRE(Shuffle<3, 0, 1>::query<3>() == 0);
+}
 
-  using ilv = Interleave<0, 5, 3>;
-  using scram = Scramble<0, 7, ilv, ilv>;
+//
+// BitRange
+//
 
-  auto t = std::make_tuple(
-    'a', 'b', 'c', 'd', 'e', 'f'
-  );
 
-  cout << "0 -> " << ilv::query(0) << endl;
-  cout << "1 -> " << ilv::query(1) << endl;
-  cout << "2 -> " << ilv::query(2) << endl;
-  cout << "3 -> " << ilv::query(3) << endl;
-  cout << "4 -> " << ilv::query(4) << endl;
-  cout << "5 -> " << ilv::query(5) << endl;
-  stream(cout, t) << endl;
+// Make sure that a BitRange with no scrambles doesn't
+// modify the data.
+TEST_CASE("BitRange - No Scrambles", "[bitrange][apply]") {
+  REQUIRE(BitRange<0, 3>::apply(0x3) == 0x3);
+}
 
-  auto ti = decltype(t)();
-  std::get<0>(ti) = std::get<ilv::query(0)>(t);
-  std::get<1>(ti) = std::get<ilv::query(1)>(t);
-  std::get<2>(ti) = std::get<ilv::query(2)>(t);
-  std::get<3>(ti) = std::get<ilv::query(3)>(t);
-  std::get<4>(ti) = std::get<ilv::query(4)>(t);
-  std::get<5>(ti) = std::get<ilv::query(5)>(t);
-  stream(cout, ti) << endl;
 
-  cout << "0 query " << hex << scram::query(0) << dec << endl;
-  cout << "1 query " << hex << scram::query(1) << dec << endl;
-  cout << "2 query " << hex << scram::query(2) << dec << endl;
-  cout << "3 query " << hex << scram::query(3) << dec << endl;
-  cout << "4 query " << hex << scram::query(4) << dec << endl;
-  cout << "5 query " << hex << scram::query(5) << dec << endl;
-
-  cout << "0 mask " << hex << scram::calculate_mask(0) << dec << endl;
-  cout << "1 mask " << hex << scram::calculate_mask(1) << dec << endl;
-  cout << "2 mask " << hex << scram::calculate_mask(2) << dec << endl;
-  cout << "3 mask " << hex << scram::calculate_mask(3) << dec << endl;
-  cout << "4 mask " << hex << scram::calculate_mask(4) << dec << endl;
-  cout << "5 mask " << hex << scram::calculate_mask(5) << dec << endl;
-
-  cout << "0 shift " << scram::calculate_shift(0) << endl;
-  cout << "1 shift " << scram::calculate_shift(1) << endl;
-  cout << "2 shift " << scram::calculate_shift(2) << endl;
-  cout << "3 shift " << scram::calculate_shift(3) << endl;
-  cout << "4 shift " << scram::calculate_shift(4) << endl;
-  cout << "5 shift " << scram::calculate_shift(5) << endl;
-
-  int x = 0xf0;
-  cout << hex << x << " -> " << scram::apply(x) << dec << endl;
-  cout << hex << x << " -> " << Scramble<0, 7, Interleave<1, 6, 3>>::apply(x) << dec << endl;
-  return 0;
+TEST_CASE("Applied Interleave", "[interleave][bitrange][apply]") {
+  //                                                 0011 -> 0101
+  REQUIRE(BitRange<0, 3, Interleave<0, 3, 2>>::apply(0x3) == 0x5);
 }

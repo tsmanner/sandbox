@@ -1,11 +1,7 @@
 #ifndef Interleave_h
 #define Interleave_h
 
-#include <limits>
-#include <tuple>
 #include <type_traits>
-
-#include <iostream>
 
 
 template <int MSB, int LSB, int WAYS>
@@ -27,10 +23,16 @@ public:
   //   e -> c  4    -2     2    0    I / W
   //   f -> f  5     0     2    1    I / W + (I % W) * G
 
-  static constexpr int query(const int& index) {
-    return (MSB <= index and index <= LSB) ?
-           ((index / WAYS) + ((index % WAYS) * GROUP)) :
-           index;
+  template <int INDEX>
+  static constexpr typename std::enable_if<(!(MSB <= INDEX and INDEX <= LSB)), int>::type
+  query() {
+    return INDEX;
+  }
+
+  template <int INDEX>
+  static constexpr typename std::enable_if<(MSB <= INDEX and INDEX <= LSB), int>::type
+  query() {
+    return (INDEX / WAYS) + ((INDEX % WAYS) * GROUP);
   }
 
 };
