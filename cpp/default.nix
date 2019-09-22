@@ -34,6 +34,8 @@ let
 
     parity = callPackage ./Parity {};
 
+    bits = callPackage ./BitManipulation {};
+
     # DistributionNetwork = callPackage ./DistributionNetwork {};
 
   };
