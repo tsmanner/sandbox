@@ -8,9 +8,10 @@ using std::endl;
 using std::hex;
 
 
-#include "Shuffle.h"
-#include "Interleave.h"
 #include "BitRange.h"
+#include "Interleave.h"
+#include "Reverse.h"
+#include "Shuffle.h"
 
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
@@ -64,17 +65,39 @@ TEST_CASE("Query Shuffle", "[shuffle][query]") {
   REQUIRE(Shuffle<3, 0, 1>::query<3>() == 0);
 }
 
+
+//
+// Reverse
+//
+
+// Left aligned 4-bit reversal test pattern
+// 0123 -> 3210
+TEST_CASE("Left Aligned Reverse", "[reverse][query]") {
+  REQUIRE(Reverse<0, 3>::query<0>() == 3);
+  REQUIRE(Reverse<0, 3>::query<1>() == 2);
+  REQUIRE(Reverse<0, 3>::query<2>() == 1);
+  REQUIRE(Reverse<0, 3>::query<3>() == 0);
+}
+
+// Unaligned 4-bit reversal test pattern
+// 2345 -> 5432
+TEST_CASE("Unaligned Reverse", "[reverse][query]") {
+  REQUIRE(Reverse<2, 5>::query<2>() == 5);  // QUERY = 2 :: 5 + 1 - 2
+  REQUIRE(Reverse<2, 5>::query<3>() == 4);  // QUERY = 3 :: 5 + 1 - 3
+  REQUIRE(Reverse<2, 5>::query<4>() == 3);  // QUERY = 4 :: 5 + 1 - 4
+  REQUIRE(Reverse<2, 5>::query<5>() == 2);  // QUERY = 5 :: 5 + 1 - 5
+}
+
+
 //
 // BitRange
 //
-
 
 // Make sure that a BitRange with no scrambles doesn't
 // modify the data.
 TEST_CASE("BitRange - No Scrambles", "[bitrange][apply]") {
   REQUIRE(BitRange<0, 3>::apply(0x3) == 0x3);
 }
-
 
 TEST_CASE("Applied Interleave", "[interleave][bitrange][apply]") {
   //                                                 0011 -> 0101
