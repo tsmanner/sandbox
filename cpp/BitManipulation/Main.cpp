@@ -82,10 +82,10 @@ TEST_CASE("Left Aligned Reverse", "[reverse][query]") {
 // Unaligned 4-bit reversal test pattern
 // 2345 -> 5432
 TEST_CASE("Unaligned Reverse", "[reverse][query]") {
-  REQUIRE(Reverse<2, 5>::query<2>() == 5);  // QUERY = 2 :: 5 + 1 - 2
-  REQUIRE(Reverse<2, 5>::query<3>() == 4);  // QUERY = 3 :: 5 + 1 - 3
-  REQUIRE(Reverse<2, 5>::query<4>() == 3);  // QUERY = 4 :: 5 + 1 - 4
-  REQUIRE(Reverse<2, 5>::query<5>() == 2);  // QUERY = 5 :: 5 + 1 - 5
+  REQUIRE(Reverse<2, 5>::query<2>() == 5);
+  REQUIRE(Reverse<2, 5>::query<3>() == 4);
+  REQUIRE(Reverse<2, 5>::query<4>() == 3);
+  REQUIRE(Reverse<2, 5>::query<5>() == 2);
 }
 
 
