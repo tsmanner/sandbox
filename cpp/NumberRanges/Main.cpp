@@ -96,3 +96,11 @@ TEST_CASE("Nonbounded Range No Overlap", "[Range][overlap]") {
   REQUIRE(!Range::overlaps(Range(-4, -2), Range(-1, Range::cNoBound)));
 
 }
+
+
+TEST_CASE("MultiRange Overlapping addRange", "[MultiRange]") {
+  auto mr = MultiRange();
+  mr.addRange(Range(-1, Range::cNoBound));
+  mr.addRange(Range(-1, 1));
+  REQUIRE(mr.getRanges().size() == 1);
+}
