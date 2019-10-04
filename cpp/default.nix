@@ -36,6 +36,8 @@ let
 
     bits = callPackage ./BitManipulation {};
 
+    ranges = callPackage ./NumberRanges {};
+
     # DistributionNetwork = callPackage ./DistributionNetwork {};
 
   };
