@@ -8,7 +8,7 @@ let
       name = "NumberRanges";
       system = builtins.currentSystem;
       src = ./.;
-      buildCommand = "mkdir $out && cp $src/NumberRanges.h $out/NumberRanges.h";
+      buildCommand = "mkdir $out && cp $src/*.h $out/";
     };
 
     # Compilation of the test executable
@@ -18,7 +18,7 @@ let
       package_name = "NumberRangesTest";
       source_root = ./.;
       source_files = [
-        "Main.cpp"
+        "tests/test_main.cpp"
       ];
       gcc_versions = [
         "gcc48"
