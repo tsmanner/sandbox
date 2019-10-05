@@ -66,12 +66,12 @@ public:
   inline friend bool operator<=(const int& lhs, LowerBound rhs) { return (lhs < rhs) or (lhs == rhs); }
 
   // Greater Than
-  inline friend bool operator>(LowerBound lhs, const int& rhs) { return !(rhs <= lhs); }
-  inline friend bool operator>(const int& lhs, LowerBound rhs) { return !(rhs <= lhs); }
+  inline friend bool operator>(LowerBound lhs, const int& rhs) { return !(lhs <= rhs); }
+  inline friend bool operator>(const int& lhs, LowerBound rhs) { return !(lhs <= rhs); }
 
   // Greater Than or Equal
-  inline friend bool operator>=(LowerBound lhs, const int& rhs) { return !(rhs < lhs); }
-  inline friend bool operator>=(const int& lhs, LowerBound rhs) { return !(rhs < lhs); }
+  inline friend bool operator>=(LowerBound lhs, const int& rhs) { return !(lhs < rhs); }
+  inline friend bool operator>=(const int& lhs, LowerBound rhs) { return !(lhs < rhs); }
 
 };
 
@@ -100,12 +100,12 @@ public:
   inline friend bool operator<=(const int& lhs, UpperBound rhs) { return (lhs < rhs) or (lhs == rhs); }
 
   // Greater Than
-  inline friend bool operator>(UpperBound lhs, const int& rhs) { return !(rhs <= lhs); }
-  inline friend bool operator>(const int& lhs, UpperBound rhs) { return !(rhs <= lhs); }
+  inline friend bool operator>(UpperBound lhs, const int& rhs) { return !(lhs <= rhs); }
+  inline friend bool operator>(const int& lhs, UpperBound rhs) { return !(lhs <= rhs); }
 
   // Greater Than or Equal
-  inline friend bool operator>=(UpperBound lhs, const int& rhs) { return !(rhs < lhs); }
-  inline friend bool operator>=(const int& lhs, UpperBound rhs) { return !(rhs < lhs); }
+  inline friend bool operator>=(UpperBound lhs, const int& rhs) { return !(lhs < rhs); }
+  inline friend bool operator>=(const int& lhs, UpperBound rhs) { return !(lhs < rhs); }
 
 };
 
