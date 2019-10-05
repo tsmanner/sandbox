@@ -6,6 +6,14 @@
 
 class Range {
 public:
+  struct NonOverlappingRangeConjunction : std::exception {
+    const char* what() { return "Attempt to calculate the conjunction of two non-overlapping Ranges"; }
+  };
+
+  struct NonOverlappingRangeDisjunction : std::exception {
+    const char* what() { return "Attempt to calculate the disjunction of two non-overlapping Ranges"; }
+  };
+
   Range(
     LowerBound inLowerBound = LowerBound(),
     UpperBound inUpperBound = UpperBound()
@@ -45,100 +53,56 @@ public:
   LowerBound& getLowerBound() { return mLowerBound; }
   UpperBound& getUpperBound() { return mUpperBound; }
 
-  bool covers(const int& value) {
+  template <typename ValueType>
+  bool covers(ValueType value) {
     return getLowerBound() <= value and value <= getUpperBound();
   }
 
-//   static bool overlaps(Range lhs, Range rhs) {
-//     // Overlap is guaranteed if either range has no bounds,
-//     // or if both ranges are missing the same bound
-//     if (
-//       (!lhs.getLowerBound().has_value() and !lhs.getUpperBound().has_value())
-//       or
-//       (!rhs.getLowerBound().has_value() and !rhs.getUpperBound().has_value())
-//       or
-//       (!lhs.getLowerBound().has_value() and !rhs.getLowerBound().has_value())
-//       or
-//       (!lhs.getUpperBound().has_value() and !rhs.getUpperBound().has_value())
-//     ) {
-//       return true;
-//     }
+  static bool overlaps(Range lhs, Range rhs) {
+    return lhs.covers(rhs.getLowerBound()) or
+           lhs.covers(rhs.getUpperBound()) or
+           rhs.covers(lhs.getUpperBound()) or
+           rhs.covers(lhs.getUpperBound());
+  }
 
-//     if (
-//       lhs.getLowerBound().has_value() and
-//       lhs.getUpperBound().has_value() and
-//       rhs.getLowerBound().has_value() and
-//       rhs.getUpperBound().has_value()
-//     ) {
-//       return
-//         lhs.covers(rhs.getLowerBound()) or
-//         lhs.covers(rhs.getUpperBound()) or
-//         rhs.covers(lhs.getLowerBound()) or
-//         rhs.covers(lhs.getUpperBound())
-//       ;
-//     }
+  // Logical Conjunction - the set of elements in both
+  static Range conjunction(Range lhs, Range rhs) {
+    if (overlaps(lhs, rhs)) {
+      return Range(
+        std::max(lhs.getLowerBound(), rhs.getLowerBound()),
+        std::min(lhs.getUpperBound(), rhs.getUpperBound())
+      );
+    }
+    throw NonOverlappingRangeConjunction();
+  }
 
-//     if (
-//       lhs.getUpperBound().has_value() and rhs.getLowerBound().has_value()
-//     ) {
-//       return rhs.getLowerBound() <= lhs.getUpperBound();
-//     }
+  // Logical Disjunction - the set of elements in either
+  static Range disjunction(Range lhs, Range rhs) {
+    if (overlaps(lhs, rhs)) {
+      return Range(
+        std::min(lhs.getLowerBound(), rhs.getLowerBound()),
+        std::max(lhs.getUpperBound(), rhs.getUpperBound())
+      );
+    }
+    throw NonOverlappingRangeDisjunction();
+  }
 
-//     if (
-//       lhs.getLowerBound().has_value() and rhs.getUpperBound().has_value()
-//     ) {
-//       return lhs.getLowerBound() <= rhs.getUpperBound();
-//     }
 
-//     return false; // Is getting here a problem?
-//   }
+  friend inline bool sort_compare(Range lhs,Range rhs) { return lhs.getLowerBound() < rhs.getLowerBound(); }
 
-//   static Range merge(Range lhs, Range rhs) {
-//     auto newRange = Range();
 
-//     // If this has no lower bound, just take rhs's lower bound
-//     if (!lhs.getLowerBound().has_value()) {
-//       newRange.getLowerBound() = rhs.getLowerBound();
-//     }
-//     // If we both have lhs lower bound, take the higher one
-//     else if (lhs.getLowerBound().has_value() and rhs.getLowerBound().has_value()) {
-//       newRange.getLowerBound() = std::max(lhs.getLowerBound().value(), rhs.getLowerBound().value());
-//     }
-
-//     // If this has no upper bound, just take rhs's upper bound
-//     if (!lhs.getUpperBound().has_value()) {
-//       newRange.getUpperBound() = rhs.getUpperBound();
-//     }
-//     // If we both have lhs upper bound, take the lower one
-//     else if (lhs.getUpperBound().has_value() and rhs.getUpperBound().has_value()) {
-//       newRange.getUpperBound() = std::min(lhs.getUpperBound().value(), rhs.getUpperBound().value());
-//     }
-
-//     return newRange;
-//   }
-
-//   friend bool operator<(Range lhs,Range rhs) {
-//     // lhs: Has no lower bound
-//     // rhs: Has lower bound
-//     // lhs < rhs
-//     if (!lhs.getLowerBound().has_value() and rhs.getLowerBound().has_value()) return true;
-//     // lhs: Has lower bound
-//     // rhs: Has no lower bound
-//     // rhs < lhs
-//     if (lhs.getLowerBound().has_value() and !rhs.getLowerBound().has_value()) return false;
-//     // lhs: Has no lower bound
-//     // rhs: Has no lower bound
-//     // lhs == rhs
-//     if (!lhs.getLowerBound().has_value() and !rhs.getLowerBound().has_value()) return false;
-//     // lhs: Has lower bound
-//     // rhs: Has lower bound
-//     // value compare
-//     return lhs.getLowerBound().value() < rhs.getLowerBound().value();
-//   }
-
-//   friend std::ostream& operator<<(std::ostream& os, Range r) {
-//     return os << r.getLowerBound() << ":" << r.getUpperBound();
-//   }
+  friend std::ostream& operator<<(std::ostream& os, Range r) {
+    os << "[";
+    if (r.getLowerBound().getType() == Bound::cClosed) {
+      os << r.getLowerBound().getValue();
+    }
+    os << ":";
+    if (r.getUpperBound().getType() == Bound::cClosed) {
+      os << r.getUpperBound().getValue();
+    }
+    os << "]";
+    return os;
+  }
 
 private:
   LowerBound mLowerBound;

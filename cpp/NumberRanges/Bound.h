@@ -1,6 +1,8 @@
 #ifndef Bound_h
 #define Bound_h
+
 #include <type_traits>
+
 
 class Bound {
 public:
@@ -110,6 +112,56 @@ public:
 };
 
 
+//
+// Equal
+//
+
+
+inline bool operator==(LowerBound lhs, LowerBound rhs) {
+  // Both are open or both have the same value
+  return (lhs.getType() == Bound::cOpen and rhs.getType() == Bound::cOpen)
+         or
+         (lhs.getValue() == rhs.getValue());
+}
+
+
+inline bool operator==(LowerBound lhs, UpperBound rhs) {
+  // Neither is open and they have the same value
+  return (lhs.getType() == Bound::cOpen and rhs.getType() == Bound::cOpen)
+         or
+         (lhs.getValue() == rhs.getValue());
+}
+
+
+inline bool operator==(UpperBound lhs, LowerBound rhs) {
+  return rhs == lhs;
+}
+
+
+inline bool operator==(UpperBound lhs, UpperBound rhs) {
+  // Both are open or both have the same value
+  return (lhs.getType() == Bound::cOpen and rhs.getType() == Bound::cOpen)
+         or
+         (lhs.getValue() == rhs.getValue());
+}
+
+
+//
+// Not Equal
+//
+
+
+inline bool operator!=(LowerBound lhs, LowerBound rhs) { return !(lhs == rhs); }
+inline bool operator!=(LowerBound lhs, UpperBound rhs) { return !(lhs == rhs); }
+inline bool operator!=(UpperBound lhs, LowerBound rhs) { return !(lhs == rhs); }
+inline bool operator!=(UpperBound lhs, UpperBound rhs) { return !(lhs == rhs); }
+
+
+//
+// Less Than
+//
+
+
 inline bool operator<(LowerBound lhs, LowerBound rhs) {
   // Both open ended lower: they're equal
   if (
@@ -160,6 +212,39 @@ inline bool operator<(UpperBound lhs, UpperBound rhs) {
   else if (rhs.getType() == Bound::cOpen) return true;
   else return lhs.getValue() < rhs.getValue();
 }
+
+
+//
+// Less Than or Equal
+//
+
+
+inline bool operator<=(LowerBound lhs, LowerBound rhs) { return (lhs == rhs) or (lhs < rhs); }
+inline bool operator<=(LowerBound lhs, UpperBound rhs) { return (lhs == rhs) or (lhs < rhs); }
+inline bool operator<=(UpperBound lhs, LowerBound rhs) { return (lhs == rhs) or (lhs < rhs); }
+inline bool operator<=(UpperBound lhs, UpperBound rhs) { return (lhs == rhs) or (lhs < rhs); }
+
+
+//
+// Greater Than
+//
+
+
+inline bool operator>(LowerBound lhs, LowerBound rhs) { return !(lhs <= rhs); }
+inline bool operator>(LowerBound lhs, UpperBound rhs) { return !(lhs <= rhs); }
+inline bool operator>(UpperBound lhs, LowerBound rhs) { return !(lhs <= rhs); }
+inline bool operator>(UpperBound lhs, UpperBound rhs) { return !(lhs <= rhs); }
+
+
+//
+// Greater Than or Equal
+//
+
+
+inline bool operator>=(LowerBound lhs, LowerBound rhs) { return !(lhs < rhs); }
+inline bool operator>=(LowerBound lhs, UpperBound rhs) { return !(lhs < rhs); }
+inline bool operator>=(UpperBound lhs, LowerBound rhs) { return !(lhs < rhs); }
+inline bool operator>=(UpperBound lhs, UpperBound rhs) { return !(lhs < rhs); }
 
 
 #endif
