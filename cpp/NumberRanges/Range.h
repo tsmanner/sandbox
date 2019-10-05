@@ -87,9 +87,7 @@ public:
     throw NonOverlappingRangeDisjunction();
   }
 
-
   friend inline bool sort_compare(Range lhs,Range rhs) { return lhs.getLowerBound() < rhs.getLowerBound(); }
-
 
   friend std::ostream& operator<<(std::ostream& os, Range r) {
     os << "[";
