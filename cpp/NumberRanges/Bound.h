@@ -52,28 +52,28 @@ public:
   void operator=(const int& inValue) { set(inValue); }
 
   // Equal
-  inline friend bool operator==(LowerBound lhs, const int& rhs) { return lhs.getType() != Bound::cOpen and lhs.getValue() == rhs; }
-  inline friend bool operator==(const int& lhs, LowerBound rhs) { return operator==(rhs, lhs); }
+  inline friend bool operator==(const LowerBound& lhs, const int& rhs) { return lhs.getType() != Bound::cOpen and lhs.getValue() == rhs; }
+  inline friend bool operator==(const int& lhs, const LowerBound& rhs) { return operator==(rhs, lhs); }
 
   // Not Equal
-  inline friend bool operator!=(LowerBound lhs, const int& rhs) { return !(lhs == rhs); }
-  inline friend bool operator!=(const int& lhs, LowerBound rhs) { return !(lhs == rhs); }
+  inline friend bool operator!=(const LowerBound& lhs, const int& rhs) { return !(lhs == rhs); }
+  inline friend bool operator!=(const int& lhs, const LowerBound& rhs) { return !(lhs == rhs); }
 
   // Less Than
-  inline friend bool operator<(LowerBound lhs, const int& rhs) { return lhs.getType() == Bound::cOpen or lhs.getValue() < rhs; }
-  inline friend bool operator<(const int& lhs, LowerBound rhs) { return rhs.getType() != Bound::cOpen and lhs < rhs.getValue(); }
+  inline friend bool operator<(const LowerBound& lhs, const int& rhs) { return lhs.getType() == Bound::cOpen or lhs.getValue() < rhs; }
+  inline friend bool operator<(const int& lhs, const LowerBound& rhs) { return rhs.getType() != Bound::cOpen and lhs < rhs.getValue(); }
 
   // Less Than or Equal
-  inline friend bool operator<=(LowerBound lhs, const int& rhs) { return (lhs < rhs) or (lhs == rhs); }
-  inline friend bool operator<=(const int& lhs, LowerBound rhs) { return (lhs < rhs) or (lhs == rhs); }
+  inline friend bool operator<=(const LowerBound& lhs, const int& rhs) { return (lhs < rhs) or (lhs == rhs); }
+  inline friend bool operator<=(const int& lhs, const LowerBound& rhs) { return (lhs < rhs) or (lhs == rhs); }
 
   // Greater Than
-  inline friend bool operator>(LowerBound lhs, const int& rhs) { return !(lhs <= rhs); }
-  inline friend bool operator>(const int& lhs, LowerBound rhs) { return !(lhs <= rhs); }
+  inline friend bool operator>(const LowerBound& lhs, const int& rhs) { return !(lhs <= rhs); }
+  inline friend bool operator>(const int& lhs, const LowerBound& rhs) { return !(lhs <= rhs); }
 
   // Greater Than or Equal
-  inline friend bool operator>=(LowerBound lhs, const int& rhs) { return !(lhs < rhs); }
-  inline friend bool operator>=(const int& lhs, LowerBound rhs) { return !(lhs < rhs); }
+  inline friend bool operator>=(const LowerBound& lhs, const int& rhs) { return !(lhs < rhs); }
+  inline friend bool operator>=(const int& lhs, const LowerBound& rhs) { return !(lhs < rhs); }
 
 };
 
@@ -86,28 +86,28 @@ public:
   void operator=(const int& inValue) { set(inValue); }
 
   // Equal
-  inline friend bool operator==(UpperBound lhs, const int& rhs) { return lhs.getType() != Bound::cOpen and lhs.getValue() == rhs; }
-  inline friend bool operator==(const int& lhs, UpperBound rhs) { return operator==(rhs, lhs); }
+  inline friend bool operator==(const UpperBound& lhs, const int& rhs) { return lhs.getType() != Bound::cOpen and lhs.getValue() == rhs; }
+  inline friend bool operator==(const int& lhs, const UpperBound& rhs) { return operator==(rhs, lhs); }
 
   // Not Equal
-  inline friend bool operator!=(UpperBound lhs, const int& rhs) { return !(lhs == rhs); }
-  inline friend bool operator!=(const int& lhs, UpperBound rhs) { return !(lhs == rhs); }
+  inline friend bool operator!=(const UpperBound& lhs, const int& rhs) { return !(lhs == rhs); }
+  inline friend bool operator!=(const int& lhs, const UpperBound& rhs) { return !(lhs == rhs); }
 
   // Less Than
-  inline friend bool operator<(UpperBound lhs, const int& rhs) { return lhs.getType() != Bound::cOpen and lhs.getValue() < rhs; }
-  inline friend bool operator<(const int& lhs, UpperBound rhs) { return rhs.getType() == Bound::cOpen or lhs < rhs.getValue(); }
+  inline friend bool operator<(const UpperBound& lhs, const int& rhs) { return lhs.getType() != Bound::cOpen and lhs.getValue() < rhs; }
+  inline friend bool operator<(const int& lhs, const UpperBound& rhs) { return rhs.getType() == Bound::cOpen or lhs < rhs.getValue(); }
 
   // Less Than or Equal
-  inline friend bool operator<=(UpperBound lhs, const int& rhs) { return (lhs < rhs) or (lhs == rhs); }
-  inline friend bool operator<=(const int& lhs, UpperBound rhs) { return (lhs < rhs) or (lhs == rhs); }
+  inline friend bool operator<=(const UpperBound& lhs, const int& rhs) { return (lhs < rhs) or (lhs == rhs); }
+  inline friend bool operator<=(const int& lhs, const UpperBound& rhs) { return (lhs < rhs) or (lhs == rhs); }
 
   // Greater Than
-  inline friend bool operator>(UpperBound lhs, const int& rhs) { return !(lhs <= rhs); }
-  inline friend bool operator>(const int& lhs, UpperBound rhs) { return !(lhs <= rhs); }
+  inline friend bool operator>(const UpperBound& lhs, const int& rhs) { return !(lhs <= rhs); }
+  inline friend bool operator>(const int& lhs, const UpperBound& rhs) { return !(lhs <= rhs); }
 
   // Greater Than or Equal
-  inline friend bool operator>=(UpperBound lhs, const int& rhs) { return !(lhs < rhs); }
-  inline friend bool operator>=(const int& lhs, UpperBound rhs) { return !(lhs < rhs); }
+  inline friend bool operator>=(const UpperBound& lhs, const int& rhs) { return !(lhs < rhs); }
+  inline friend bool operator>=(const int& lhs, const UpperBound& rhs) { return !(lhs < rhs); }
 
 };
 
@@ -117,7 +117,7 @@ public:
 //
 
 
-inline bool operator==(LowerBound lhs, LowerBound rhs) {
+inline bool operator==(const LowerBound& lhs, const LowerBound& rhs) {
   // Both are open or both have the same value
   return (lhs.getType() == Bound::cOpen and rhs.getType() == Bound::cOpen)
          or
@@ -125,7 +125,7 @@ inline bool operator==(LowerBound lhs, LowerBound rhs) {
 }
 
 
-inline bool operator==(LowerBound lhs, UpperBound rhs) {
+inline bool operator==(const LowerBound& lhs, const UpperBound& rhs) {
   // Neither is open and they have the same value
   return (lhs.getType() == Bound::cOpen and rhs.getType() == Bound::cOpen)
          or
@@ -133,12 +133,12 @@ inline bool operator==(LowerBound lhs, UpperBound rhs) {
 }
 
 
-inline bool operator==(UpperBound lhs, LowerBound rhs) {
+inline bool operator==(const UpperBound& lhs, const LowerBound& rhs) {
   return rhs == lhs;
 }
 
 
-inline bool operator==(UpperBound lhs, UpperBound rhs) {
+inline bool operator==(const UpperBound& lhs, const UpperBound& rhs) {
   // Both are open or both have the same value
   return (lhs.getType() == Bound::cOpen and rhs.getType() == Bound::cOpen)
          or
@@ -151,10 +151,10 @@ inline bool operator==(UpperBound lhs, UpperBound rhs) {
 //
 
 
-inline bool operator!=(LowerBound lhs, LowerBound rhs) { return !(lhs == rhs); }
-inline bool operator!=(LowerBound lhs, UpperBound rhs) { return !(lhs == rhs); }
-inline bool operator!=(UpperBound lhs, LowerBound rhs) { return !(lhs == rhs); }
-inline bool operator!=(UpperBound lhs, UpperBound rhs) { return !(lhs == rhs); }
+inline bool operator!=(const LowerBound& lhs, const LowerBound& rhs) { return !(lhs == rhs); }
+inline bool operator!=(const LowerBound& lhs, const UpperBound& rhs) { return !(lhs == rhs); }
+inline bool operator!=(const UpperBound& lhs, const LowerBound& rhs) { return !(lhs == rhs); }
+inline bool operator!=(const UpperBound& lhs, const UpperBound& rhs) { return !(lhs == rhs); }
 
 
 //
@@ -162,7 +162,7 @@ inline bool operator!=(UpperBound lhs, UpperBound rhs) { return !(lhs == rhs); }
 //
 
 
-inline bool operator<(LowerBound lhs, LowerBound rhs) {
+inline bool operator<(const LowerBound& lhs, const LowerBound& rhs) {
   // Both open ended lower: they're equal
   if (
     lhs.getType() == Bound::cOpen and
@@ -176,7 +176,7 @@ inline bool operator<(LowerBound lhs, LowerBound rhs) {
 }
 
 
-inline bool operator<(LowerBound lhs, UpperBound rhs) {
+inline bool operator<(const LowerBound& lhs, const UpperBound& rhs) {
   // Either is open ended, the lower bound is less
   if (
     lhs.getType() == Bound::cOpen or
@@ -188,7 +188,7 @@ inline bool operator<(LowerBound lhs, UpperBound rhs) {
 }
 
 
-inline bool operator<(UpperBound lhs, LowerBound rhs) {
+inline bool operator<(const UpperBound& lhs, const LowerBound& rhs) {
   // Either is open ended, the lower bound is less
   if (
     lhs.getType() == Bound::cOpen or
@@ -200,7 +200,7 @@ inline bool operator<(UpperBound lhs, LowerBound rhs) {
 }
 
 
-inline bool operator<(UpperBound lhs, UpperBound rhs) {
+inline bool operator<(const UpperBound& lhs, const UpperBound rhs) {
   // Both open ended lower: they're equal
   if (
     lhs.getType() == Bound::cOpen and
@@ -219,10 +219,10 @@ inline bool operator<(UpperBound lhs, UpperBound rhs) {
 //
 
 
-inline bool operator<=(LowerBound lhs, LowerBound rhs) { return (lhs == rhs) or (lhs < rhs); }
-inline bool operator<=(LowerBound lhs, UpperBound rhs) { return (lhs == rhs) or (lhs < rhs); }
-inline bool operator<=(UpperBound lhs, LowerBound rhs) { return (lhs == rhs) or (lhs < rhs); }
-inline bool operator<=(UpperBound lhs, UpperBound rhs) { return (lhs == rhs) or (lhs < rhs); }
+inline bool operator<=(const LowerBound& lhs, const LowerBound& rhs) { return (lhs == rhs) or (lhs < rhs); }
+inline bool operator<=(const LowerBound& lhs, const UpperBound& rhs) { return (lhs == rhs) or (lhs < rhs); }
+inline bool operator<=(const UpperBound& lhs, const LowerBound& rhs) { return (lhs == rhs) or (lhs < rhs); }
+inline bool operator<=(const UpperBound& lhs, const UpperBound& rhs) { return (lhs == rhs) or (lhs < rhs); }
 
 
 //
@@ -230,10 +230,10 @@ inline bool operator<=(UpperBound lhs, UpperBound rhs) { return (lhs == rhs) or 
 //
 
 
-inline bool operator>(LowerBound lhs, LowerBound rhs) { return !(lhs <= rhs); }
-inline bool operator>(LowerBound lhs, UpperBound rhs) { return !(lhs <= rhs); }
-inline bool operator>(UpperBound lhs, LowerBound rhs) { return !(lhs <= rhs); }
-inline bool operator>(UpperBound lhs, UpperBound rhs) { return !(lhs <= rhs); }
+inline bool operator>(const LowerBound& lhs, const LowerBound& rhs) { return !(lhs <= rhs); }
+inline bool operator>(const LowerBound& lhs, const UpperBound& rhs) { return !(lhs <= rhs); }
+inline bool operator>(const UpperBound& lhs, const LowerBound& rhs) { return !(lhs <= rhs); }
+inline bool operator>(const UpperBound& lhs, const UpperBound& rhs) { return !(lhs <= rhs); }
 
 
 //
@@ -241,10 +241,10 @@ inline bool operator>(UpperBound lhs, UpperBound rhs) { return !(lhs <= rhs); }
 //
 
 
-inline bool operator>=(LowerBound lhs, LowerBound rhs) { return !(lhs < rhs); }
-inline bool operator>=(LowerBound lhs, UpperBound rhs) { return !(lhs < rhs); }
-inline bool operator>=(UpperBound lhs, LowerBound rhs) { return !(lhs < rhs); }
-inline bool operator>=(UpperBound lhs, UpperBound rhs) { return !(lhs < rhs); }
+inline bool operator>=(const LowerBound& lhs, const LowerBound& rhs) { return !(lhs < rhs); }
+inline bool operator>=(const LowerBound& lhs, const UpperBound& rhs) { return !(lhs < rhs); }
+inline bool operator>=(const UpperBound& lhs, const LowerBound& rhs) { return !(lhs < rhs); }
+inline bool operator>=(const UpperBound& lhs, const UpperBound& rhs) { return !(lhs < rhs); }
 
 
 #endif

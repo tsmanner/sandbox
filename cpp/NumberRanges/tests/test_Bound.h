@@ -1,6 +1,4 @@
 #include "Bound.h"
-#include "LowerBound.h"
-#include "UpperBound.h"
 
 
 TEST_CASE("Bound Default Constructor", "[Bound]") {

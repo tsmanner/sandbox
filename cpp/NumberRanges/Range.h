@@ -54,8 +54,40 @@ public:
   UpperBound& getUpperBound() { return mUpperBound; }
 
   template <typename ValueType>
-  bool covers(ValueType value) {
-    return getLowerBound() <= value and value <= getUpperBound();
+  bool covers(ValueType inValue) {
+    return getLowerBound() <= inValue and inValue <= getUpperBound();
+  }
+
+  static bool adjacent(Range lhs, Range rhs) {
+    if (
+      lhs.getUpperBound().getType() == Bound::cClosed and
+      rhs.getLowerBound().getType() == Bound::cClosed and
+      lhs.getUpperBound().getValue() + 1 == rhs.getLowerBound().getValue()
+    ) {
+      return true;
+    }
+    if (
+      rhs.getUpperBound().getType() == Bound::cClosed and
+      lhs.getLowerBound().getType() == Bound::cClosed and
+      rhs.getUpperBound().getValue() + 1 == lhs.getLowerBound().getValue()
+    ) {
+      return true;
+    }
+    if (
+      lhs.getLowerBound().getType() == Bound::cClosed and
+      rhs.getUpperBound().getType() == Bound::cClosed and
+      lhs.getLowerBound().getValue() + 1 == rhs.getUpperBound().getValue()
+    ) {
+      return true;
+    }
+    if (
+      rhs.getLowerBound().getType() == Bound::cClosed and
+      lhs.getUpperBound().getType() == Bound::cClosed and
+      rhs.getLowerBound().getValue() + 1 == lhs.getUpperBound().getValue()
+    ) {
+      return true;
+    }
+    return false;
   }
 
   static bool overlaps(Range lhs, Range rhs) {
@@ -66,6 +98,7 @@ public:
   }
 
   // Logical Conjunction - the set of elements in both
+  // Ranges must overlap
   static Range conjunction(Range lhs, Range rhs) {
     if (overlaps(lhs, rhs)) {
       return Range(
@@ -77,8 +110,9 @@ public:
   }
 
   // Logical Disjunction - the set of elements in either
+  // Ranges must overlap or be adjacent
   static Range disjunction(Range lhs, Range rhs) {
-    if (overlaps(lhs, rhs)) {
+    if (adjacent(lhs, rhs) or overlaps(lhs, rhs)) {
       return Range(
         std::min(lhs.getLowerBound(), rhs.getLowerBound()),
         std::max(lhs.getUpperBound(), rhs.getUpperBound())
@@ -87,7 +121,14 @@ public:
     throw NonOverlappingRangeDisjunction();
   }
 
-  friend inline bool sort_compare(Range lhs,Range rhs) { return lhs.getLowerBound() < rhs.getLowerBound(); }
+  struct Compare {
+    bool operator()(Range lhs,Range rhs) {
+      if (lhs.getLowerBound() == rhs.getLowerBound()) {
+        return lhs.getUpperBound() < rhs.getUpperBound();
+      }
+      return lhs.getLowerBound() < rhs.getLowerBound();
+    }
+  };
 
   friend std::ostream& operator<<(std::ostream& os, Range r) {
     os << "[";

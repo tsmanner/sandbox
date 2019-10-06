@@ -3,3 +3,4 @@
 
 #include "test_Bound.h"
 #include "test_Range.h"
+#include "test_MultiRange.h"
