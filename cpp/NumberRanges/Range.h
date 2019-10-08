@@ -53,6 +53,9 @@ public:
   LowerBound& getLowerBound() { return mLowerBound; }
   UpperBound& getUpperBound() { return mUpperBound; }
 
+  const LowerBound& getLowerBound() const { return mLowerBound; }
+  const UpperBound& getUpperBound() const { return mUpperBound; }
+
   template <typename ValueType>
   bool covers(ValueType inValue) {
     return getLowerBound() <= inValue and inValue <= getUpperBound();

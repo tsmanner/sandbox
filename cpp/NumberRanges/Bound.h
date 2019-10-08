@@ -6,9 +6,6 @@
 
 class Bound {
 public:
-  class Open {};
-  class Closed {};
-
   enum eType {
     cClosed
   , cOpen
