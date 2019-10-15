@@ -98,7 +98,7 @@ TEST_CASE("UpperBound < LowerBound", "[Bound][LowerBound][UpperBound][lt][less]"
 }
 
 
-TEST_CASE("LowerBound vs int operator==", "[Bound][LowerBound][lt][less]") {
+TEST_CASE("LowerBound vs int operator==", "[Bound][LowerBound][eq][equal]") {
   REQUIRE(!(LowerBound() == 1));
   REQUIRE(!(LowerBound(0) == 1));
   REQUIRE(LowerBound(0) == 0);
@@ -112,7 +112,7 @@ TEST_CASE("LowerBound vs int operator==", "[Bound][LowerBound][lt][less]") {
 }
 
 
-TEST_CASE("UpperBound vs int operator==", "[Bound][UpperBound][lt][less]") {
+TEST_CASE("UpperBound vs int operator==", "[Bound][UpperBound][eq][equal]") {
   REQUIRE(!(UpperBound(0) == 1));
   REQUIRE(UpperBound(0) == 0);
   REQUIRE(!(UpperBound(1) == 0));
@@ -126,7 +126,7 @@ TEST_CASE("UpperBound vs int operator==", "[Bound][UpperBound][lt][less]") {
 }
 
 
-TEST_CASE("LowerBound vs int operator!=", "[Bound][LowerBound][lt][less]") {
+TEST_CASE("LowerBound vs int operator!=", "[Bound][LowerBound][ne][notequal]") {
   REQUIRE(LowerBound() != 1);
   REQUIRE(LowerBound(0) != 1);
   REQUIRE(!(LowerBound(0) != 0));
@@ -140,7 +140,7 @@ TEST_CASE("LowerBound vs int operator!=", "[Bound][LowerBound][lt][less]") {
 }
 
 
-TEST_CASE("UpperBound vs int operator!=", "[Bound][UpperBound][lt][less]") {
+TEST_CASE("UpperBound vs int operator!=", "[Bound][UpperBound][ne][notequal]") {
   REQUIRE(UpperBound(0) != 1);
   REQUIRE(UpperBound(1) != 0);
   REQUIRE(!(UpperBound(0) != 0));
@@ -182,7 +182,7 @@ TEST_CASE("UpperBound vs int operator<", "[Bound][UpperBound][lt][less]") {
 }
 
 
-TEST_CASE("LowerBound vs int operator<=", "[Bound][LowerBound][lt][less]") {
+TEST_CASE("LowerBound vs int operator<=", "[Bound][LowerBound][le][lessequal]") {
   REQUIRE(LowerBound() <= 1);
   REQUIRE(LowerBound(0) <= 1);
   REQUIRE(LowerBound(0) <= 0);
@@ -196,7 +196,7 @@ TEST_CASE("LowerBound vs int operator<=", "[Bound][LowerBound][lt][less]") {
 }
 
 
-TEST_CASE("UpperBound vs int operator<=", "[Bound][UpperBound][lt][less]") {
+TEST_CASE("UpperBound vs int operator<=", "[Bound][UpperBound][le][lessequal]") {
   REQUIRE(UpperBound(0) <= 1);
   REQUIRE(UpperBound(0) <= 0);
   REQUIRE(!(UpperBound(1) <= 0));
@@ -210,7 +210,7 @@ TEST_CASE("UpperBound vs int operator<=", "[Bound][UpperBound][lt][less]") {
 }
 
 
-TEST_CASE("LowerBound vs int operator>", "[Bound][LowerBound][lt][less]") {
+TEST_CASE("LowerBound vs int operator>", "[Bound][LowerBound][gt][greater]") {
   REQUIRE(!(LowerBound() > 1));
   REQUIRE(!(LowerBound(0) > 1));
   REQUIRE(!(LowerBound(0) > 0));
@@ -224,7 +224,7 @@ TEST_CASE("LowerBound vs int operator>", "[Bound][LowerBound][lt][less]") {
 }
 
 
-TEST_CASE("UpperBound vs int operator>", "[Bound][UpperBound][lt][less]") {
+TEST_CASE("UpperBound vs int operator>", "[Bound][UpperBound][gt][greater]") {
   REQUIRE(!(UpperBound(0) > 1));
   REQUIRE(!(UpperBound(0) > 0));
   REQUIRE(UpperBound(1) > 0);
@@ -238,7 +238,7 @@ TEST_CASE("UpperBound vs int operator>", "[Bound][UpperBound][lt][less]") {
 }
 
 
-TEST_CASE("LowerBound vs int operator>=", "[Bound][LowerBound][lt][less]") {
+TEST_CASE("LowerBound vs int operator>=", "[Bound][LowerBound][ge][greaterequal]") {
   REQUIRE(!(LowerBound() >= 1));
   REQUIRE(!(LowerBound(0) >= 1));
   REQUIRE(LowerBound(0) >= 0);
@@ -252,7 +252,7 @@ TEST_CASE("LowerBound vs int operator>=", "[Bound][LowerBound][lt][less]") {
 }
 
 
-TEST_CASE("UpperBound vs int operator>=", "[Bound][UpperBound][lt][less]") {
+TEST_CASE("UpperBound vs int operator>=", "[Bound][UpperBound][ge][greaterequal]") {
   REQUIRE(!(UpperBound(0) >= 1));
   REQUIRE(UpperBound(0) >= 0);
   REQUIRE(UpperBound(1) >= 0);
