@@ -3,8 +3,6 @@
 
 #include <functional>
 
-#include "SpeculativeOperand.h"
-
 
 template <typename OperandType> class SpecAtom;
 template <typename OperandType> class SpecValue;

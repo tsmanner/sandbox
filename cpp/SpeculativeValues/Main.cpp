@@ -11,13 +11,13 @@ using std::endl;
 using std::setw;
 
 #include "SpeculativeOperation.h"
+#include "SpeculativeOperand.h"
 
 
 int main() {
   //
   // Speculative Operation
   //
-  cout << endl << endl;
 
   auto x = SpecValue<SpeculativeOperand>(SpeculativeOperand(1, 2));
   auto y = SpecValue<SpeculativeOperand>(SpeculativeOperand(2, 3));
