@@ -70,73 +70,10 @@ private:
 };
 
 
-template <typename OperandType>
-class SpecOpAdd : public SpecOp<OperandType> {
-public:
-  SpecOpAdd(
-    const SpecAtom<OperandType>* inLhs,
-    const SpecAtom<OperandType>* inRhs
-  ):
-    SpecOp<OperandType>(add, inLhs, inRhs)
-  {
-  }
-
-  static OperandType add(const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) { return lhs->resolve() + rhs->resolve(); }
-
-};
-
-
-template <typename OperandType>
-class SpecOpSub : public SpecOp<OperandType> {
-public:
-  SpecOpSub(
-    const SpecAtom<OperandType>* inLhs,
-    const SpecAtom<OperandType>* inRhs
-  ):
-    SpecOp<OperandType>(subtract, inLhs, inRhs)
-  {
-  }
-
-  static OperandType subtract(const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) { return lhs->resolve() - rhs->resolve(); }
-
-};
-
-
-template <typename OperandType>
-class SpecOpMul : public SpecOp<OperandType> {
-public:
-  SpecOpMul(
-    const SpecAtom<OperandType>* inLhs,
-    const SpecAtom<OperandType>* inRhs
-  ):
-    SpecOp<OperandType>(multiply, inLhs, inRhs)
-  {
-  }
-
-  static OperandType multiply(const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) { return lhs->resolve() * rhs->resolve(); }
-
-};
-
-
-template <typename OperandType>
-class SpecOpDiv : public SpecOp<OperandType> {
-public:
-  SpecOpDiv(
-    const SpecAtom<OperandType>* inLhs,
-    const SpecAtom<OperandType>* inRhs
-  ):
-    SpecOp<OperandType>(divide, inLhs, inRhs)
-  {
-  }
-
-  static OperandType divide(const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) { return lhs->resolve() / rhs->resolve(); }
-
-};
-
-template <typename OperandType> SpecOp<OperandType> operator+(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs) { return SpecOpAdd<OperandType>(&lhs, &rhs); }
-template <typename OperandType> SpecOp<OperandType> operator-(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs) { return SpecOpSub<OperandType>(&lhs, &rhs); }
-template <typename OperandType> SpecOp<OperandType> operator*(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs) { return SpecOpMul<OperandType>(&lhs, &rhs); }
-template <typename OperandType> SpecOp<OperandType> operator/(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs) { return SpecOpDiv<OperandType>(&lhs, &rhs); }
+template <typename OperandType> SpecOp<OperandType> operator+(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs) { return SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() + rhs->resolve(); }, &lhs, &rhs); }
+template <typename OperandType> SpecOp<OperandType> operator-(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs) { return SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() - rhs->resolve(); }, &lhs, &rhs); }
+template <typename OperandType> SpecOp<OperandType> operator*(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs) { return SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() * rhs->resolve(); }, &lhs, &rhs); }
+template <typename OperandType> SpecOp<OperandType> operator/(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs) { return SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() / rhs->resolve(); }, &lhs, &rhs); }
 
 
 #endif
