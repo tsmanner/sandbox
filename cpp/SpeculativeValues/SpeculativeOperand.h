@@ -1,6 +1,7 @@
 #ifndef SpeculativeOperand_h
 #define SpeculativeOperand_h
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <random>
@@ -119,8 +120,8 @@ public:
     }
     else if (lhs.mHasValue) {
       return SpeculativeOperand(
-        lhs.mValue - rhs.mLowerBound,
-        lhs.mValue - rhs.mUpperBound
+        lhs.mValue - rhs.mUpperBound,
+        lhs.mValue - rhs.mLowerBound
       );
     }
     else if (rhs.mHasValue) {
@@ -130,8 +131,8 @@ public:
       );
     }
     return SpeculativeOperand(
-      lhs.mLowerBound - rhs.mLowerBound,
-      lhs.mUpperBound - rhs.mUpperBound
+      lhs.mLowerBound - rhs.mUpperBound,
+      lhs.mUpperBound - rhs.mLowerBound
     );
   }
 
@@ -181,13 +182,37 @@ public:
     );
   }
 
+  // Max
+  friend SpeculativeOperand max(const SpeculativeOperand& lhs, const SpeculativeOperand& rhs) {
+    if (lhs.mHasValue and rhs.mHasValue) {
+      return SpeculativeOperand(std::max(lhs.mValue, rhs.mValue));
+    }
+    else if (lhs.mHasValue) {
+      return SpeculativeOperand(
+        std::max(lhs.mValue, rhs.mLowerBound),
+        std::max(lhs.mValue, rhs.mUpperBound)
+      );
+    }
+    else if (rhs.mHasValue) {
+      return SpeculativeOperand(
+        std::max(lhs.mLowerBound, rhs.mValue),
+        std::max(lhs.mUpperBound, rhs.mValue)
+      );
+    }
+    return SpeculativeOperand(
+      std::max(lhs.mLowerBound, rhs.mLowerBound),
+      std::max(lhs.mUpperBound, rhs.mUpperBound)
+    );
+  }
+
+
   //
   // Stream Operator
   //
   friend std::ostream& operator<<(std::ostream& os, const SpeculativeOperand& so) {
     if (so.mHasValue) return os << so.mValue;
     std::stringstream ss;
-    ss << "(" << so.mLowerBound << ":" << so.mUpperBound << ")";
+    ss << "[" << so.mLowerBound << ":" << so.mUpperBound << "]";
     return os << ss.str();
   }
 
