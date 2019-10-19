@@ -12,21 +12,32 @@ class SpeculativeOperand {
 public:
   static std::default_random_engine generator;
 
+  // Default Constructor
+  SpeculativeOperand(
+  ):
+    mHasValue(false),
+    mValue(0),
+    mLowerBound(0),
+    mUpperBound(0)
+  {
+  }
+
   // Bounded Constructor
   SpeculativeOperand(
-    int inLowerBound,
-    int inUpperBound
+    const int& inLowerBound,
+    const int& inUpperBound
   ):
     mHasValue(false),
     mValue(0),
     mLowerBound(inLowerBound),
     mUpperBound(inUpperBound)
   {
+    if (inLowerBound == inUpperBound) makeConcrete();
   }
 
   // Value Constructor
   SpeculativeOperand(
-    int inValue
+    const int& inValue
   ):
     mHasValue(true),
     mValue(inValue),
@@ -77,6 +88,7 @@ public:
 
 
   bool hasValue() { return mHasValue; }
+  int getValue() { return mValue; }
 
   void makeConcrete() {
     if (!mHasValue) {
@@ -205,6 +217,29 @@ public:
     );
   }
 
+  // Min
+  friend SpeculativeOperand min(const SpeculativeOperand& lhs, const SpeculativeOperand& rhs) {
+    if (lhs.mHasValue and rhs.mHasValue) {
+      return SpeculativeOperand(std::min(lhs.mValue, rhs.mValue));
+    }
+    else if (lhs.mHasValue) {
+      return SpeculativeOperand(
+        std::min(lhs.mValue, rhs.mLowerBound),
+        std::min(lhs.mValue, rhs.mUpperBound)
+      );
+    }
+    else if (rhs.mHasValue) {
+      return SpeculativeOperand(
+        std::min(lhs.mLowerBound, rhs.mValue),
+        std::min(lhs.mUpperBound, rhs.mValue)
+      );
+    }
+    return SpeculativeOperand(
+      std::min(lhs.mLowerBound, rhs.mLowerBound),
+      std::min(lhs.mUpperBound, rhs.mUpperBound)
+    );
+  }
+
 
   //
   // Stream Operator
@@ -226,6 +261,8 @@ private:
 
 // Initialize the static random number generator
 std::default_random_engine SpeculativeOperand::generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
+
+void makeOperandConcrete(SpeculativeOperand& inSpeculativeOperand) { inSpeculativeOperand.makeConcrete(); }
 
 
 #endif

@@ -23,6 +23,7 @@ template <typename OperandType>
 class SpecAtom : public object_ptr_interface {
 public:
   virtual OperandType resolve() const = 0;
+  virtual void makeConcrete() = 0;
 
   virtual std::string to_string() const = 0;
 
@@ -42,6 +43,7 @@ public:
   SpecValue(const OperandType& inOperand): SpecAtom<OperandType>(), mOperand(inOperand) {}
 
   virtual OperandType resolve() const { return mOperand; }
+  virtual void makeConcrete() { makeOperandConcrete(getOperand()); }
 
   OperandType& getOperand() { return mOperand; }
 
@@ -79,6 +81,10 @@ public:
   }
 
   virtual OperandType resolve() const { return mOperation(getLhs(), getRhs()); }
+  virtual void makeConcrete() {
+    mLhs->makeConcrete();
+    mRhs->makeConcrete();
+  }
 
   const SpecAtom<OperandType>* getLhs() const { return mLhs.get(); }
   const SpecAtom<OperandType>* getRhs() const { return mRhs.get(); }
@@ -107,17 +113,8 @@ template <typename OperandType> object_ptr<SpecAtom<OperandType>> operator-(obje
 template <typename OperandType> object_ptr<SpecAtom<OperandType>> operator*(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() * rhs->resolve(); }, lhs.get(), rhs.get(), "*")); }
 template <typename OperandType> object_ptr<SpecAtom<OperandType>> operator/(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() / rhs->resolve(); }, lhs.get(), rhs.get(), "/")); }
 
-
-template <typename OperandType>
-object_ptr<SpecAtom<OperandType>> max(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) {
-  auto resultP = new SpecOp<OperandType>(
-    [](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return max(lhs->resolve(), rhs->resolve()); },
-    lhs.get(),
-    rhs.get(),
-    "max"
-  );
-  return object_ptr<SpecAtom<OperandType>>(resultP);
-}
+template <typename OperandType> object_ptr<SpecAtom<OperandType>> max(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return max(lhs->resolve(), rhs->resolve()); }, lhs.get(), rhs.get(), "max")); }
+template <typename OperandType> object_ptr<SpecAtom<OperandType>> min(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return min(lhs->resolve(), rhs->resolve()); }, lhs.get(), rhs.get(), "min")); }
 
 
 template <typename OperandType, typename... OperandTypes>
@@ -131,6 +128,20 @@ template <typename OperandType, typename... OperandTypes>
 typename std::enable_if<(sizeof...(OperandTypes) != 0), object_ptr<SpecAtom<OperandType>>>::type
 max(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs, OperandTypes... inOperands) {
   return max(max(lhs, rhs), inOperands...);
+}
+
+
+template <typename OperandType, typename... OperandTypes>
+typename std::enable_if<(sizeof...(OperandTypes) == 0), object_ptr<SpecAtom<OperandType>>>::type
+min(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs, OperandTypes... inOperands) {
+  return min(lhs, rhs);
+}
+
+
+template <typename OperandType, typename... OperandTypes>
+typename std::enable_if<(sizeof...(OperandTypes) != 0), object_ptr<SpecAtom<OperandType>>>::type
+min(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs, OperandTypes... inOperands) {
+  return min(min(lhs, rhs), inOperands...);
 }
 
 
