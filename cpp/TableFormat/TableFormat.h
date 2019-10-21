@@ -25,7 +25,7 @@ struct Table {
 
 
   template <typename... Ts>
-  static std::ostream&
+  static typename enable_if<(sizeof...(Ts) == COLUMNS), std::ostream&>::type
   row(std::ostream& os, const Ts&... ts) {
     return cell(os << "|", ts...);
   }

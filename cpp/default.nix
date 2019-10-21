@@ -32,13 +32,17 @@ let
 
     catch = callPackage ./catch {};
 
-    parity = callPackage ./Parity {};
+    TableFormat = callPackage ./TableFormat {};
 
-    bits = callPackage ./BitManipulation {};
+    object_ptr = callPackage ./object_ptr {};
 
-    ranges = callPackage ./NumberRanges {};
+    Parity = callPackage ./Parity {};
 
-    # DistributionNetwork = callPackage ./DistributionNetwork {};
+    BitManipulation = callPackage ./BitManipulation {};
+
+    NumberRanges = callPackage ./NumberRanges {};
+
+    SpeculativeValues = callPackage ./SpeculativeValues {};
 
   };
 

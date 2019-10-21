@@ -8,141 +8,189 @@
 
 #include "object_ptr.h"
 
-
-template <typename OperandType> class SpecAtom;
-template <typename OperandType> class SpecValue;
-template <typename OperandType> class SpecOp;
-
-template <typename OperandType> SpecOp<OperandType> operator+(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs);
-template <typename OperandType> SpecOp<OperandType> operator-(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs);
-template <typename OperandType> SpecOp<OperandType> operator*(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs);
-template <typename OperandType> SpecOp<OperandType> operator/(const SpecAtom<OperandType>& lhs, const SpecAtom<OperandType>& rhs);
+#include "SpeculativeNode.h"
 
 
-template <typename OperandType>
-class SpecAtom : public object_ptr_interface {
+template <typename T>
+class SpeculativeOperation : public SpeculativeNode<T> {
 public:
-  virtual OperandType resolve() const = 0;
-  virtual void makeConcrete() = 0;
-
-  virtual std::string to_string() const = 0;
-
-  friend std::ostream& operator<<(std::ostream& os, const SpecAtom& sa) {
-    return os << sa.to_string();
-  }
-
-
-private:
-
-};
-
-
-template <typename OperandType>
-class SpecValue : public SpecAtom<OperandType> {
-public:
-  SpecValue(const OperandType& inOperand): SpecAtom<OperandType>(), mOperand(inOperand) {}
-
-  virtual OperandType resolve() const { return mOperand; }
-  virtual void makeConcrete() { makeOperandConcrete(getOperand()); }
-
-  OperandType& getOperand() { return mOperand; }
-
-  virtual std::string to_string() const {
-    std::stringstream ss;
-    ss << mOperand;
-    return ss.str();
-  }
-
-  friend std::ostream& operator<<(std::ostream& os, const SpecValue& sv) {
-    return os << sv.to_string();
-  }
-
-private:
-  OperandType mOperand;
-
-};
-
-
-template <typename OperandType>
-class SpecOp : public SpecAtom<OperandType> {
-public:
-  SpecOp(
-    std::function<OperandType(const SpecAtom<OperandType>*, const SpecAtom<OperandType>*)> inOperation,
-    SpecAtom<OperandType>* inLhs,
-    SpecAtom<OperandType>* inRhs,
-    const std::string& inOperationSymbol = ' '
+  // int        int
+  SpeculativeOperation(
+    const std::string& inSymbol,
+    std::function<T(const T&, const T&)> inFunction,
+    const T& inLhs,
+    const T& inRhs
   ):
-    SpecAtom<OperandType>(),
-    mOperation(inOperation),
-    mLhs(inLhs),
-    mRhs(inRhs),
-    mOperationSymbol(inOperationSymbol)
+    SpeculativeOperation(inSymbol, inFunction, new SpeculativeLiteral<T>(inLhs), new SpeculativeLiteral<T>(inRhs))
   {
   }
 
-  virtual OperandType resolve() const { return mOperation(getLhs(), getRhs()); }
-  virtual void makeConcrete() {
-    mLhs->makeConcrete();
-    mRhs->makeConcrete();
+  // int        Node*
+  SpeculativeOperation(
+    const std::string& inSymbol,
+    std::function<T(const T&, const T&)> inFunction,
+    const T& inLhs,
+    SpeculativeNode<T>* inRhs
+  ):
+    SpeculativeOperation(inSymbol, inFunction, new SpeculativeLiteral<T>(inLhs), inRhs)
+  {
   }
 
-  const SpecAtom<OperandType>* getLhs() const { return mLhs.get(); }
-  const SpecAtom<OperandType>* getRhs() const { return mRhs.get(); }
+  // int        object_ptr
+  SpeculativeOperation(
+    const std::string& inSymbol,
+    std::function<T(const T&, const T&)> inFunction,
+    const T& inLhs,
+    object_ptr<SpeculativeNode<T>> inRhs
+  ):
+    SpeculativeOperation(inSymbol, inFunction, inLhs, inRhs.get())
+  {
+  }
 
-  virtual std::string to_string() const {
+  // Node*      int
+  SpeculativeOperation(
+    const std::string& inSymbol,
+    std::function<T(const T&, const T&)> inFunction,
+    SpeculativeNode<T>* inLhs,
+    const T& inRhs
+  ):
+    SpeculativeOperation(inSymbol, inFunction, inLhs, new SpeculativeLiteral<T>(inRhs))
+  {
+  }
+
+  // Node*      Node*
+  // This is the base constructor, all others
+  // resolve to here
+  SpeculativeOperation(
+    const std::string& inSymbol,
+    std::function<T(const T&, const T&)> inFunction,
+    SpeculativeNode<T>* inLhs,
+    SpeculativeNode<T>* inRhs
+  ):
+    SpeculativeNode<T>(),
+    mSymbol(inSymbol),
+    mFunction(inFunction),
+    mLhs(inLhs),
+    mRhs(inRhs)
+  {
+  }
+
+  // Node*      object_ptr
+  SpeculativeOperation(
+    const std::string& inSymbol,
+    std::function<T(const T&, const T&)> inFunction,
+    SpeculativeNode<T>* inLhs,
+    object_ptr<SpeculativeNode<T>> inRhs
+  ):
+    SpeculativeOperation(inSymbol, inFunction, inLhs, inRhs.get())
+  {
+  }
+
+  // object_ptr int
+  SpeculativeOperation(
+    const std::string& inSymbol,
+    std::function<T(const T&, const T&)> inFunction,
+    object_ptr<SpeculativeNode<T>> inLhs,
+    const T& inRhs
+  ):
+    SpeculativeOperation(inSymbol, inFunction, inLhs.get(), new SpeculativeLiteral<T>(inRhs))
+  {
+  }
+
+  // object_ptr Node*
+  SpeculativeOperation(
+    const std::string& inSymbol,
+    std::function<T(const T&, const T&)> inFunction,
+    object_ptr<SpeculativeNode<T>> inLhs,
+    SpeculativeNode<T>* inRhs
+  ):
+    SpeculativeOperation(inSymbol, inFunction, inLhs.get(), inRhs)
+  {
+  }
+
+  // object_ptr object_ptr
+  SpeculativeOperation(
+    const std::string& inSymbol,
+    std::function<T(const T&, const T&)> inFunction,
+    object_ptr<SpeculativeNode<T>> inLhs,
+    object_ptr<SpeculativeNode<T>> inRhs
+  ):
+    SpeculativeOperation(inSymbol, inFunction, inLhs.get(), inRhs.get())
+  {
+  }
+
+  virtual ~SpeculativeOperation() {}
+
+  virtual T resolve() { return mFunction(mLhs->resolve(), mRhs->resolve()); }
+
+  virtual std::string to_string() {
     std::stringstream ss;
-    ss << "(" << mLhs->to_string() << " " << mOperationSymbol << " " << mRhs->to_string() << ")";
+    ss << "(" << mLhs->to_string() << " " << mSymbol << " " << mRhs->to_string() << ")";
     return ss.str();
   }
 
-  friend std::ostream& operator<<(std::ostream& os, const SpecOp& so) {
-    return os << so.to_string();
-  }
+  friend std::ostream& operator<<(std::ostream& os, SpeculativeOperation<T> o) { return os << o.to_string(); }
 
 private:
-  std::function<OperandType(const SpecAtom<OperandType>*, const SpecAtom<OperandType>*)> mOperation;
-  object_ptr<SpecAtom<OperandType>> mLhs;
-  object_ptr<SpecAtom<OperandType>> mRhs;
-  std::string mOperationSymbol;
+  std::string mSymbol;
+  std::function<T(const T&, const T&)> mFunction;
+  object_ptr<SpeculativeNode<T>> mLhs;
+  object_ptr<SpeculativeNode<T>> mRhs;
 
 };
 
 
-template <typename OperandType> object_ptr<SpecAtom<OperandType>> operator+(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() + rhs->resolve(); }, lhs.get(), rhs.get(), "+")); }
-template <typename OperandType> object_ptr<SpecAtom<OperandType>> operator-(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() - rhs->resolve(); }, lhs.get(), rhs.get(), "-")); }
-template <typename OperandType> object_ptr<SpecAtom<OperandType>> operator*(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() * rhs->resolve(); }, lhs.get(), rhs.get(), "*")); }
-template <typename OperandType> object_ptr<SpecAtom<OperandType>> operator/(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return lhs->resolve() / rhs->resolve(); }, lhs.get(), rhs.get(), "/")); }
+//
+// Operators
+//
 
-template <typename OperandType> object_ptr<SpecAtom<OperandType>> max(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return max(lhs->resolve(), rhs->resolve()); }, lhs.get(), rhs.get(), "max")); }
-template <typename OperandType> object_ptr<SpecAtom<OperandType>> min(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs) { return object_ptr<SpecAtom<OperandType>>(new SpecOp<OperandType>([](const SpecAtom<OperandType>* lhs, const SpecAtom<OperandType>* rhs) -> OperandType { return min(lhs->resolve(), rhs->resolve()); }, lhs.get(), rhs.get(), "min")); }
+// Addition
+template <typename T> object_ptr<SpeculativeNode<T>> operator+(object_ptr<SpeculativeNode<T>> lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("+", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs + l_rhs; }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> operator+(                     const T&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("+", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs + l_rhs; }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> operator+(object_ptr<SpeculativeNode<T>> lhs,                      const T&  rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("+", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs + l_rhs; }, lhs, rhs)); }
+// If the other operand isn't a `T`, attempt to construct one from it
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> operator+(                const OtherT&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return T(lhs) + rhs; }
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> operator+(object_ptr<SpeculativeNode<T>> lhs,                 const OtherT&  rhs) { return lhs + T(rhs); }
 
+// Subtraction
+template <typename T> object_ptr<SpeculativeNode<T>> operator-(object_ptr<SpeculativeNode<T>> lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("-", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs - l_rhs; }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> operator-(                     const T&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("-", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs - l_rhs; }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> operator-(object_ptr<SpeculativeNode<T>> lhs,                      const T&  rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("-", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs - l_rhs; }, lhs, rhs)); }
+// If the other operand isn't a `T`, attempt to construct one from it
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> operator-(                const OtherT&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return T(lhs) - rhs; }
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> operator-(object_ptr<SpeculativeNode<T>> lhs,                 const OtherT&  rhs) { return lhs - T(rhs); }
 
-template <typename OperandType, typename... OperandTypes>
-typename std::enable_if<(sizeof...(OperandTypes) == 0), object_ptr<SpecAtom<OperandType>>>::type
-max(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs, OperandTypes... inOperands) {
-  return max(lhs, rhs);
-}
+// Multiplication
+template <typename T> object_ptr<SpeculativeNode<T>> operator*(object_ptr<SpeculativeNode<T>> lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("*", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs * l_rhs; }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> operator*(                     const T&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("*", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs * l_rhs; }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> operator*(object_ptr<SpeculativeNode<T>> lhs,                      const T&  rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("*", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs * l_rhs; }, lhs, rhs)); }
+// If the other operand isn't a `T`, attempt to construct one from it
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> operator*(                const OtherT&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return T(lhs) * rhs; }
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> operator*(object_ptr<SpeculativeNode<T>> lhs,                 const OtherT&  rhs) { return lhs * T(rhs); }
 
+// Division
+template <typename T> object_ptr<SpeculativeNode<T>> operator/(object_ptr<SpeculativeNode<T>> lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("/", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs / l_rhs; }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> operator/(                     const T&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("/", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs / l_rhs; }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> operator/(object_ptr<SpeculativeNode<T>> lhs,                      const T&  rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("/", [](const T& l_lhs, const T& l_rhs) -> T { return l_lhs / l_rhs; }, lhs, rhs)); }
+// If the other operand isn't a `T`, attempt to construct one from it
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> operator/(                const OtherT&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return T(lhs) / rhs; }
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> operator/(object_ptr<SpeculativeNode<T>> lhs,                 const OtherT&  rhs) { return lhs / T(rhs); }
 
-template <typename OperandType, typename... OperandTypes>
-typename std::enable_if<(sizeof...(OperandTypes) != 0), object_ptr<SpecAtom<OperandType>>>::type
-max(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs, OperandTypes... inOperands) {
-  return max(max(lhs, rhs), inOperands...);
-}
+// Maximum
+template <typename T> object_ptr<SpeculativeNode<T>> max(object_ptr<SpeculativeNode<T>> lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("max", [](const T& l_lhs, const T& l_rhs) -> T { return max(l_lhs, l_rhs); }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> max(                     const T&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("max", [](const T& l_lhs, const T& l_rhs) -> T { return max(l_lhs, l_rhs); }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> max(object_ptr<SpeculativeNode<T>> lhs,                      const T&  rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("max", [](const T& l_lhs, const T& l_rhs) -> T { return max(l_lhs, l_rhs); }, lhs, rhs)); }
+// If the other operand isn't a `T`, attempt to construct one from it
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> max(                const OtherT&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return max(T(lhs), rhs); }
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> max(object_ptr<SpeculativeNode<T>> lhs,                 const OtherT&  rhs) { return max(lhs, T(rhs)); }
 
-
-template <typename OperandType, typename... OperandTypes>
-typename std::enable_if<(sizeof...(OperandTypes) == 0), object_ptr<SpecAtom<OperandType>>>::type
-min(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs, OperandTypes... inOperands) {
-  return min(lhs, rhs);
-}
-
-
-template <typename OperandType, typename... OperandTypes>
-typename std::enable_if<(sizeof...(OperandTypes) != 0), object_ptr<SpecAtom<OperandType>>>::type
-min(object_ptr<SpecAtom<OperandType>> lhs, object_ptr<SpecAtom<OperandType>> rhs, OperandTypes... inOperands) {
-  return min(min(lhs, rhs), inOperands...);
-}
+// Minimum
+template <typename T> object_ptr<SpeculativeNode<T>> min(object_ptr<SpeculativeNode<T>> lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("min", [](const T& l_lhs, const T& l_rhs) -> T { return min(l_lhs, l_rhs); }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> min(                     const T&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("min", [](const T& l_lhs, const T& l_rhs) -> T { return min(l_lhs, l_rhs); }, lhs, rhs)); }
+template <typename T> object_ptr<SpeculativeNode<T>> min(object_ptr<SpeculativeNode<T>> lhs,                      const T&  rhs) { return object_ptr<SpeculativeNode<T>>(new SpeculativeOperation<T>("min", [](const T& l_lhs, const T& l_rhs) -> T { return min(l_lhs, l_rhs); }, lhs, rhs)); }
+// If the other operand isn't a `T`, attempt to construct one from it
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> min(                const OtherT&  lhs, object_ptr<SpeculativeNode<T>> rhs) { return min(T(lhs), rhs); }
+template <typename T, typename OtherT> object_ptr<SpeculativeNode<T>> min(object_ptr<SpeculativeNode<T>> lhs,                 const OtherT&  rhs) { return min(lhs, T(rhs)); }
 
 
 #endif

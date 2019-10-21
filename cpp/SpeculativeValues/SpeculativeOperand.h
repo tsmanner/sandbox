@@ -102,7 +102,9 @@ public:
   // Mathematical Operators
   //
 
+  //
   // Addition
+  //
   friend SpeculativeOperand operator+(const SpeculativeOperand& lhs, const SpeculativeOperand& rhs) {
     if (lhs.mHasValue and rhs.mHasValue) {
       return SpeculativeOperand(lhs.mValue + rhs.mValue);
@@ -124,8 +126,12 @@ public:
       lhs.mUpperBound + rhs.mUpperBound
     );
   }
+  friend SpeculativeOperand operator+(const int& lhs, const SpeculativeOperand& rhs) { return SpeculativeOperand(lhs) + rhs; }
+  friend SpeculativeOperand operator+(const SpeculativeOperand& lhs, const int& rhs) { return lhs + SpeculativeOperand(rhs); }
 
+  //
   // Subtraction
+  //
   friend SpeculativeOperand operator-(const SpeculativeOperand& lhs, const SpeculativeOperand& rhs) {
     if (lhs.mHasValue and rhs.mHasValue) {
       return SpeculativeOperand(lhs.mValue - rhs.mValue);
@@ -147,8 +153,12 @@ public:
       lhs.mUpperBound - rhs.mLowerBound
     );
   }
+  friend SpeculativeOperand operator-(const int& lhs, const SpeculativeOperand& rhs) { return SpeculativeOperand(lhs) - rhs; }
+  friend SpeculativeOperand operator-(const SpeculativeOperand& lhs, const int& rhs) { return lhs - SpeculativeOperand(rhs); }
 
+  //
   // Multiplication
+  //
   friend SpeculativeOperand operator*(const SpeculativeOperand& lhs, const SpeculativeOperand& rhs) {
     if (lhs.mHasValue and rhs.mHasValue) {
       return SpeculativeOperand(lhs.mValue * rhs.mValue);
@@ -170,8 +180,12 @@ public:
       lhs.mUpperBound * rhs.mUpperBound
     );
   }
+  friend SpeculativeOperand operator*(const int& lhs, const SpeculativeOperand& rhs) { return SpeculativeOperand(lhs) * rhs; }
+  friend SpeculativeOperand operator*(const SpeculativeOperand& lhs, const int& rhs) { return lhs * SpeculativeOperand(rhs); }
 
+  //
   // Division
+  //
   friend SpeculativeOperand operator/(const SpeculativeOperand& lhs, const SpeculativeOperand& rhs) {
     if (lhs.mHasValue and rhs.mHasValue) {
       return SpeculativeOperand(lhs.mValue / rhs.mValue);
@@ -193,8 +207,12 @@ public:
       lhs.mLowerBound / rhs.mLowerBound
     );
   }
+  friend SpeculativeOperand operator/(const int& lhs, const SpeculativeOperand& rhs) { return SpeculativeOperand(lhs) / rhs; }
+  friend SpeculativeOperand operator/(const SpeculativeOperand& lhs, const int& rhs) { return lhs / SpeculativeOperand(rhs); }
 
+  //
   // Max
+  //
   friend SpeculativeOperand max(const SpeculativeOperand& lhs, const SpeculativeOperand& rhs) {
     if (lhs.mHasValue and rhs.mHasValue) {
       return SpeculativeOperand(std::max(lhs.mValue, rhs.mValue));
@@ -216,8 +234,12 @@ public:
       std::max(lhs.mUpperBound, rhs.mUpperBound)
     );
   }
+  friend SpeculativeOperand max(const int& lhs, const SpeculativeOperand& rhs) { return max(SpeculativeOperand(lhs), rhs); }
+  friend SpeculativeOperand max(const SpeculativeOperand& lhs, const int& rhs) { return max(lhs, SpeculativeOperand(rhs)); }
 
+  //
   // Min
+  //
   friend SpeculativeOperand min(const SpeculativeOperand& lhs, const SpeculativeOperand& rhs) {
     if (lhs.mHasValue and rhs.mHasValue) {
       return SpeculativeOperand(std::min(lhs.mValue, rhs.mValue));
@@ -239,7 +261,8 @@ public:
       std::min(lhs.mUpperBound, rhs.mUpperBound)
     );
   }
-
+  friend SpeculativeOperand min(const int& lhs, const SpeculativeOperand& rhs) { return min(SpeculativeOperand(lhs), rhs); }
+  friend SpeculativeOperand min(const SpeculativeOperand& lhs, const int& rhs) { return min(lhs, SpeculativeOperand(rhs)); }
 
   //
   // Stream Operator
@@ -263,6 +286,5 @@ private:
 std::default_random_engine SpeculativeOperand::generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
 
 void makeOperandConcrete(SpeculativeOperand& inSpeculativeOperand) { inSpeculativeOperand.makeConcrete(); }
-
 
 #endif
