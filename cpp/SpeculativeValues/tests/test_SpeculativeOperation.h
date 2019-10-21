@@ -183,15 +183,194 @@ TEST_CASE("SpeculativeOperation operator<<", "[SpeculativeOperation][ostream]") 
 //     object_ptr int(uint)
 
 // Addition
+TEST_CASE("Addition object_ptr object_ptr", "[SpeculativeOperation]") {
+  auto specLiteralLhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
+  auto specLiteralRhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(2));
+  auto specOp = specLiteralLhs + specLiteralRhs;
+  REQUIRE(specOp->resolve() == 3);
+}
+
+TEST_CASE("Addition int object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
+  auto specOp = int(2) + specLiteral;
+  REQUIRE(specOp->resolve() == 3);
+}
+
+TEST_CASE("Addition object_ptr int", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
+  auto specOp = specLiteral + int(2);
+  REQUIRE(specOp->resolve() == 3);
+}
+
 TEST_CASE("Addition int(uint) object_ptr", "[SpeculativeOperation]") {
   auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
-  auto specOp = specLiteral + uint(2);
+  auto specOp = uint(2) + specLiteral;
   REQUIRE(specOp->resolve() == 3);
 }
 
 TEST_CASE("Addition object_ptr int(uint)", "[SpeculativeOperation]") {
   auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
-  auto specOp = uint(2) + specLiteral;
+  auto specOp = specLiteral + uint(2);
   REQUIRE(specOp->resolve() == 3);
+}
+
+// Subtraction
+TEST_CASE("Subtraction object_ptr object_ptr", "[SpeculativeOperation]") {
+  auto specLiteralLhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
+  auto specLiteralRhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(2));
+  auto specOp = specLiteralLhs - specLiteralRhs;
+  REQUIRE(specOp->resolve() == -1);
+}
+
+TEST_CASE("Subtraction int object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
+  auto specOp = int(2) - specLiteral;
+  REQUIRE(specOp->resolve() == 1);
+}
+
+TEST_CASE("Subtraction object_ptr int", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
+  auto specOp = specLiteral - int(2);
+  REQUIRE(specOp->resolve() == -1);
+}
+
+TEST_CASE("Subtraction int(uint) object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
+  auto specOp = uint(2) - specLiteral;
+  REQUIRE(specOp->resolve() == 1);
+}
+
+TEST_CASE("Subtraction object_ptr int(uint)", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(1));
+  auto specOp = specLiteral - uint(2);
+  REQUIRE(specOp->resolve() == -1);
+}
+
+// Multiplication
+TEST_CASE("Multiplication object_ptr object_ptr", "[SpeculativeOperation]") {
+  auto specLiteralLhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specLiteralRhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(2));
+  auto specOp = specLiteralLhs * specLiteralRhs;
+  REQUIRE(specOp->resolve() == 8);
+}
+
+TEST_CASE("Multiplication int object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = int(2) * specLiteral;
+  REQUIRE(specOp->resolve() == 8);
+}
+
+TEST_CASE("Multiplication object_ptr int", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = specLiteral * int(2);
+  REQUIRE(specOp->resolve() == 8);
+}
+
+TEST_CASE("Multiplication int(uint) object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = uint(2) * specLiteral;
+  REQUIRE(specOp->resolve() == 8);
+}
+
+TEST_CASE("Multiplication object_ptr int(uint)", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = specLiteral * uint(2);
+  REQUIRE(specOp->resolve() == 8);
+}
+
+// Division
+TEST_CASE("Division object_ptr object_ptr", "[SpeculativeOperation]") {
+  auto specLiteralLhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specLiteralRhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(2));
+  auto specOp = specLiteralLhs / specLiteralRhs;
+  REQUIRE(specOp->resolve() == 2);
+}
+
+TEST_CASE("Division int object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = int(8) / specLiteral;
+  REQUIRE(specOp->resolve() == 2);
+}
+
+TEST_CASE("Division object_ptr int", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = specLiteral / int(2);
+  REQUIRE(specOp->resolve() == 2);
+}
+
+TEST_CASE("Division int(uint) object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = uint(8) / specLiteral;
+  REQUIRE(specOp->resolve() == 2);
+}
+
+TEST_CASE("Division object_ptr int(uint)", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = specLiteral / uint(2);
+  REQUIRE(specOp->resolve() == 2);
+}
+
+// Maximum
+TEST_CASE("Maximum object_ptr object_ptr", "[SpeculativeOperation]") {
+  auto specLiteralLhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specLiteralRhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(2));
+  auto specOp = max(specLiteralLhs, specLiteralRhs);
+  REQUIRE(specOp->resolve() == 4);
+}
+
+TEST_CASE("Maximum int object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = max(int(2), specLiteral);
+  REQUIRE(specOp->resolve() == 4);
+}
+
+TEST_CASE("Maximum object_ptr int", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = max(specLiteral, int(2));
+  REQUIRE(specOp->resolve() == 4);
+}
+
+TEST_CASE("Maximum int(uint) object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = max(uint(2), specLiteral);
+  REQUIRE(specOp->resolve() == 4);
+}
+
+TEST_CASE("Maximum object_ptr int(uint)", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = max(specLiteral, uint(2));
+  REQUIRE(specOp->resolve() == 4);
+}
+
+// Minimum
+TEST_CASE("Minimum object_ptr object_ptr", "[SpeculativeOperation]") {
+  auto specLiteralLhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specLiteralRhs = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(2));
+  auto specOp = min(specLiteralLhs, specLiteralRhs);
+  REQUIRE(specOp->resolve() == 2);
+}
+
+TEST_CASE("Minimum int object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = min(int(2), specLiteral);
+  REQUIRE(specOp->resolve() == 2);
+}
+
+TEST_CASE("Minimum object_ptr int", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = min(specLiteral, int(2));
+  REQUIRE(specOp->resolve() == 2);
+}
+
+TEST_CASE("Minimum int(uint) object_ptr", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = min(uint(2), specLiteral);
+  REQUIRE(specOp->resolve() == 2);
+}
+
+TEST_CASE("Minimum object_ptr int(uint)", "[SpeculativeOperation]") {
+  auto specLiteral = object_ptr<SpeculativeNode<int>>(new SpeculativeLiteral<int>(4));
+  auto specOp = min(specLiteral, uint(2));
+  REQUIRE(specOp->resolve() == 2);
 }
 
