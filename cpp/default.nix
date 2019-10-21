@@ -44,6 +44,8 @@ let
 
     SpeculativeValues = callPackage ./SpeculativeValues {};
 
+    StringVStringView = callPackage ./StringVStringView {};
+
   };
 
 in

@@ -123,6 +123,8 @@ public:
 
   virtual T resolve() { return mFunction(mLhs->resolve(), mRhs->resolve()); }
 
+  virtual void makeConcrete() { mLhs->makeConcrete(); mRhs->makeConcrete(); };
+
   virtual std::string to_string() {
     std::stringstream ss;
     ss << "(" << mLhs->to_string() << " " << mSymbol << " " << mRhs->to_string() << ")";

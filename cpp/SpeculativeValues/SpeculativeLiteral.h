@@ -21,9 +21,20 @@ public:
   {
   }
 
+  template <typename... ArgTypes>
+  SpeculativeLiteral(
+    ArgTypes... inArgs
+  ):
+    SpeculativeNode<T>(),
+    mValue(inArgs...)
+  {
+  }
+
   virtual ~SpeculativeLiteral() {}
 
   virtual T resolve() { return mValue; }
+
+  virtual void makeConcrete() { mValue.makeConcrete(); }
 
   virtual std::string to_string() {
     std::stringstream ss;

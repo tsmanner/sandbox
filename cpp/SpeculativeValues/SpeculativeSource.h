@@ -27,6 +27,8 @@ public:
 
   virtual T resolve() { return mSourceFunction(); }
 
+  virtual void makeConcrete() { mSourceFunction().makeConcrete(); }
+
   virtual std::string to_string() {
     std::stringstream ss;
     ss << mSourceFunction();
@@ -36,7 +38,7 @@ public:
   friend std::ostream& operator<<(std::ostream& os, SpeculativeSource<T> s) { return os << s.to_string(); }
 
 private:
-  std::function<T()> mSourceFunction;
+  std::function<T&()> mSourceFunction;
 
 };
 

@@ -1,26 +1,22 @@
-#include "object_ptr.h"
-
-
-class Owner {
-  object_ptr<SpeculativeNode<SpeculativeOperand>> mNode = new SpeculativeSource<SpeculativeOperand>(&Owner::getValue, this);
-  SpeculativeOperand mValue;
-
+class SpecVal {
 public:
+  SpecVal() {}
+  SpecVal(const int& value, const bool& concrete = true): mIsConcrete(concrete), mValue(value) {}
 
-  Owner(
-    const SpeculativeOperand& inValue = SpeculativeOperand()
-  ):
-    mValue(inValue)
-  {
+  const SpecVal& operator=(const int& value) {
+    mValue = value;
+    return *this;
   }
 
-  virtual ~Owner() {}
+  operator int() const {
+    if (mIsConcrete) return mValue;
+    return -1;
+  }
 
-  void setValue(SpeculativeOperand inValue) { mValue = inValue; }
-  const SpeculativeOperand& getValue() const { return mValue; }
-  void makeConcrete() { mValue.makeConcrete(); }
+  void makeConcrete() { mIsConcrete = true; }
 
-  void setNode(decltype(mNode) inNode) { mNode = inNode; }
-  decltype(mNode) getNode() { return mNode; }
+private:
+  bool mIsConcrete = false;
+  int mValue = 0;
 
 };
