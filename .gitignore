@@ -1,4 +1,14 @@
+# VS Code
 .vscode/
 
-a.out
+# C++ Binaries
+*.out
+*.dll
+*.a
+*.so
 
+# GDB
+.gdbinit
+
+# NIX
+result*

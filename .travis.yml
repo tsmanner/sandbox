@@ -1,0 +1,9 @@
+branches:
+  only:
+    - master
+    - travis-setup
+
+before_install:
+  - curl https://nixos.org/nix/install | sh && . /home/travis/.nix-profile/etc/profile.d/nix.sh
+
+script: nix-build --show-trace -j 4 -k -A cpp.parity.test -A cpp.bits.test  -A cpp.ranges.test
