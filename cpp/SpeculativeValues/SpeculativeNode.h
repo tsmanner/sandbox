@@ -13,6 +13,7 @@ public:
   virtual ~SpeculativeNode() {}
 
   virtual T resolve() = 0;
+  virtual bool isConcrete() = 0;
   virtual void makeConcrete() = 0;
   virtual std::string to_string() = 0;
 
