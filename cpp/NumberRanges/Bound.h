@@ -1,6 +1,7 @@
 #ifndef Bound_h
 #define Bound_h
 
+#include <limits>
 #include <type_traits>
 
 
@@ -11,8 +12,9 @@ public:
   , cOpen
   };
 
-  Bound(): mValue(), mType(cOpen) {}
-  Bound(const int& t): mValue(t), mType(cClosed) {}
+  Bound(const int& t, const eType& inType): mValue(t), mType(inType) {}
+
+  void operator=(const int& inValue) { set(inValue); }
 
   template <eType BoundType>
   typename std::enable_if<(BoundType == cOpen), void>::type
@@ -43,8 +45,8 @@ private:
 
 class LowerBound : public Bound {
 public:
-  LowerBound(): Bound() {}
-  LowerBound(const int& inValue): Bound(inValue) {}
+  LowerBound(): Bound(std::numeric_limits<int>::min(), Bound::cOpen) {}
+  LowerBound(const int& inValue): Bound(inValue, Bound::cClosed) {}
 
   void operator=(const int& inValue) { set(inValue); }
 
@@ -77,8 +79,8 @@ public:
 
 class UpperBound : public Bound {
 public:
-  UpperBound(): Bound() {}
-  UpperBound(const int& inValue): Bound(inValue) {}
+  UpperBound(): Bound(std::numeric_limits<int>::max(), Bound::cOpen) {}
+  UpperBound(const int& inValue): Bound(inValue, Bound::cClosed) {}
 
   void operator=(const int& inValue) { set(inValue); }
 
@@ -124,9 +126,11 @@ inline bool operator==(const LowerBound& lhs, const LowerBound& rhs) {
 
 inline bool operator==(const LowerBound& lhs, const UpperBound& rhs) {
   // Neither is open and they have the same value
-  return (lhs.getType() == Bound::cOpen and rhs.getType() == Bound::cOpen)
-         or
-         (lhs.getValue() == rhs.getValue());
+  return lhs.getType() != Bound::cOpen
+         and
+         rhs.getType() != Bound::cOpen
+         and
+         lhs.getValue() == rhs.getValue();
 }
 
 

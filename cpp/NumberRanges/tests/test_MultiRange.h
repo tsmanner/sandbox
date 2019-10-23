@@ -3,7 +3,7 @@
 
 TEST_CASE("MultiRange Constructor", "[MultiRange]") {
   auto mr = MultiRange();
-  REQUIRE(mr.getRanges().size() == 0);
+  CHECK(mr.getRanges().size() == 0);
 }
 
 
@@ -13,33 +13,33 @@ TEST_CASE("MultiRange addRange", "[MultiRange][addRange]") {
   mr.addRange(originalRange);
 
   // Make sure there's only 1 thing in there
-  REQUIRE(mr.getRanges().size() == 1);
+  CHECK(mr.getRanges().size() == 1);
 
   // Make sure that 1 thing is the RIGHT thing
   auto beginRange = *mr.getRanges().begin();
-  REQUIRE(originalRange.getLowerBound() == beginRange.getLowerBound());
-  REQUIRE(originalRange.getUpperBound() == beginRange.getUpperBound());
+  CHECK(originalRange.getLowerBound() == beginRange.getLowerBound());
+  CHECK(originalRange.getUpperBound() == beginRange.getUpperBound());
 
 }
 
 
 TEST_CASE("MultiRange covers", "[MultiRange][covers]") {
   auto mr = MultiRange();
-  REQUIRE(!mr.covers(0));
+  CHECK(!mr.covers(0));
 
   mr.addRange(Range(-1, 1));
-  REQUIRE(mr.covers(0));
+  CHECK(mr.covers(0));
 
   mr.addRange(Range(3, 5));
-  REQUIRE(!mr.covers(2));
+  CHECK(!mr.covers(2));
 
   mr.addRange(Range(LowerBound(), -5));
-  REQUIRE(mr.covers(-20));
-  REQUIRE(mr.covers(LowerBound()));
+  CHECK(mr.covers(-20));
+  CHECK(mr.covers(LowerBound()));
 
   mr.addRange(Range(10, UpperBound()));
-  REQUIRE(mr.covers(20));
-  REQUIRE(mr.covers(UpperBound()));
+  CHECK(mr.covers(20));
+  CHECK(mr.covers(UpperBound()));
 
 }
 
@@ -48,22 +48,22 @@ TEST_CASE("MultiRange optimize", "[MultiRange][optimize]") {
   auto mr = MultiRange();
   mr.addRange(Range(-1, 1));
   mr.addRange(Range(3, 5));
-  REQUIRE(mr.getRanges().size() == 2);
-  REQUIRE(!mr.covers(2));
+  CHECK(mr.getRanges().size() == 2);
+  CHECK(!mr.covers(2));
 
   mr.addRange(Range(2, 2));
-  REQUIRE(mr.getRanges().size() == 1);
-  REQUIRE(mr.covers(-1));
-  REQUIRE(mr.covers(5));
+  CHECK(mr.getRanges().size() == 1);
+  CHECK(mr.covers(-1));
+  CHECK(mr.covers(5));
 
   mr.addRange(Range(7, 10));
-  REQUIRE(mr.getRanges().size() == 2);
+  CHECK(mr.getRanges().size() == 2);
 
   mr.addRange(Range(12, 15));
-  REQUIRE(mr.getRanges().size() == 3);
+  CHECK(mr.getRanges().size() == 3);
 
   mr.addRange(Range(14, 20));
-  REQUIRE(mr.getRanges().size() == 3);
+  CHECK(mr.getRanges().size() == 3);
 
 }
 
@@ -73,13 +73,13 @@ TEST_CASE("Disjunction of one RangeSet", "[MultiRange][RangeSet][disjunction]") 
   rs.insert(Range(-1, 1));
   rs.insert(Range(3, 5));
   rs = MultiRange::disjunction(rs);
-  REQUIRE(rs.size() == 2);
+  CHECK(rs.size() == 2);
 
   rs.insert(Range(2, 2));
   rs = MultiRange::disjunction(rs);
-  REQUIRE(rs.size() == 1);
-  REQUIRE(rs.begin()->getLowerBound() == -1);
-  REQUIRE(rs.begin()->getUpperBound() ==  5);
+  CHECK(rs.size() == 1);
+  CHECK(rs.begin()->getLowerBound() == -1);
+  CHECK(rs.begin()->getUpperBound() ==  5);
 
 }
 
@@ -89,14 +89,14 @@ TEST_CASE("Conjunction of one RangeSet", "[MultiRange][RangeSet][conjunction]") 
   rs.insert(Range(-1, 1));
   rs.insert(Range(3, 5));
   rs = MultiRange::conjunction(rs);
-  REQUIRE(rs.size() == 0);
+  CHECK(rs.size() == 0);
 
   rs.insert(Range(-1, 1));
   rs.insert(Range(1, 3));
   rs = MultiRange::conjunction(rs);
-  REQUIRE(rs.size() == 1);
-  REQUIRE(rs.begin()->getLowerBound() == 1);
-  REQUIRE(rs.begin()->getUpperBound() == 1);
+  CHECK(rs.size() == 1);
+  CHECK(rs.begin()->getLowerBound() == 1);
+  CHECK(rs.begin()->getUpperBound() == 1);
 
 }
 
@@ -114,18 +114,18 @@ TEST_CASE("Disjunction of two MultiRanges", "[MultiRange][disjunction]") {
 
   auto disjunction = MultiRange::disjunction(lhs, rhs);
 
-  REQUIRE(!disjunction.covers(-2));
-  REQUIRE( disjunction.covers(-1));
-  REQUIRE( disjunction.covers( 0));
-  REQUIRE( disjunction.covers( 1));
-  REQUIRE(!disjunction.covers( 2));
-  REQUIRE( disjunction.covers( 3));
-  REQUIRE( disjunction.covers( 4));
-  REQUIRE( disjunction.covers( 5));
-  REQUIRE(!disjunction.covers( 6));
-  REQUIRE( disjunction.covers( 7));
-  REQUIRE( disjunction.covers( 8));
-  REQUIRE(!disjunction.covers( 9));
+  CHECK(!disjunction.covers(-2));
+  CHECK( disjunction.covers(-1));
+  CHECK( disjunction.covers( 0));
+  CHECK( disjunction.covers( 1));
+  CHECK(!disjunction.covers( 2));
+  CHECK( disjunction.covers( 3));
+  CHECK( disjunction.covers( 4));
+  CHECK( disjunction.covers( 5));
+  CHECK(!disjunction.covers( 6));
+  CHECK( disjunction.covers( 7));
+  CHECK( disjunction.covers( 8));
+  CHECK(!disjunction.covers( 9));
 
 }
 
@@ -142,12 +142,38 @@ TEST_CASE("Conjunction of two MultiRanges", "[MultiRange][conjunction]") {
 
   auto conjunction = MultiRange::conjunction(lhs, rhs);
 
-  REQUIRE( conjunction.covers(-1));
-  REQUIRE(!conjunction.covers( 0));
-  REQUIRE( conjunction.covers( 1));
-  REQUIRE(!conjunction.covers( 2));
-  REQUIRE(!conjunction.covers( 3));
-  REQUIRE( conjunction.covers( 4));
-  REQUIRE(!conjunction.covers( 5));
+  CHECK( conjunction.covers(-1));
+  CHECK(!conjunction.covers( 0));
+  CHECK( conjunction.covers( 1));
+  CHECK(!conjunction.covers( 2));
+  CHECK(!conjunction.covers( 3));
+  CHECK( conjunction.covers( 4));
+  CHECK(!conjunction.covers( 5));
 
+}
+
+
+TEST_CASE("MultiRange stream operator") {
+  auto mr = MultiRange();
+  mr.addRange(Range(-1, 1));
+  mr.addRange(Range(3, 5));
+  std::stringstream ss;
+  ss << mr;
+  CHECK(ss.str() == "([-1:1], [3:5])");
+}
+
+
+TEST_CASE("MultiRange size") {
+  auto mr = MultiRange();
+  mr.addRange(Range(-1, 1));
+  mr.addRange(Range(3, 5));
+  CHECK(mr.size() == 6);
+}
+
+
+TEST_CASE("MultiRange draw") {
+  auto mr = MultiRange();
+  mr.addRange(Range(-1, 1));
+  mr.addRange(Range(3, 5));
+  CHECK(mr.covers(mr.draw()));
 }

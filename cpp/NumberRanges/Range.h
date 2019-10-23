@@ -1,6 +1,9 @@
 #ifndef Range_h
 #define Range_h
 
+#include <limits>
+#include <ostream>
+
 #include "Bound.h"
 
 
@@ -133,14 +136,36 @@ public:
     }
   };
 
+  size_t size() {
+    if (
+      getLowerBound().getType() == Bound::cOpen and
+      getUpperBound().getType() == Bound::cOpen
+    ) {
+      return size_t(1) + std::numeric_limits<int>::max() - std::numeric_limits<int>::min();
+    }
+    else if(
+      getLowerBound().getType() == Bound::cOpen
+    ) {
+      return size_t(1) + getUpperBound().getValue() - std::numeric_limits<int>::min();
+    }
+    else if(
+      getUpperBound().getType() == Bound::cOpen
+    ) {
+      return size_t(1) + std::numeric_limits<int>::max() - getLowerBound().getValue();
+    }
+    return size_t(1) + getUpperBound().getValue() - getLowerBound().getValue();
+  }
+
   friend std::ostream& operator<<(std::ostream& os, Range r) {
     os << "[";
     if (r.getLowerBound().getType() == Bound::cClosed) {
       os << r.getLowerBound().getValue();
     }
-    os << ":";
-    if (r.getUpperBound().getType() == Bound::cClosed) {
-      os << r.getUpperBound().getValue();
+    if (r.getLowerBound() != r.getUpperBound()) {
+      os << ":";
+      if (r.getUpperBound().getType() == Bound::cClosed) {
+        os << r.getUpperBound().getValue();
+      }
     }
     os << "]";
     return os;

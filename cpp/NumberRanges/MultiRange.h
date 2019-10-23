@@ -1,14 +1,26 @@
 #ifndef MultiRange_h
 #define MultiRange_h
 
+#include <chrono>
+#include <exception>
+#include <ostream>
+#include <random>
 #include <set>
 #include <utility>
 
 #include "Range.h"
 
 
+struct MultiRangeDrawOutOfRangeException : public std::exception {
+  virtual const char* what() const throw() {
+    return "MultiRange draw index out of range!";
+  }
+};
+
+
 class MultiRange {
 public:
+  static std::default_random_engine generator;
   using RangeSet = std::set<Range, Range::Compare>;
 
   RangeSet& getRanges() { return mRanges; }
@@ -116,10 +128,42 @@ public:
     return conjunctionMultiRange;
   }
 
+  friend std::ostream& operator<<(std::ostream& os, MultiRange mr) {
+    os << "(";
+    for (auto iter = mr.mRanges.begin(); iter != mr.mRanges.end(); ++iter) {
+      if (iter != mr.mRanges.begin()) os << ", ";
+      os << *iter;
+    }
+    os << ")";
+    return os;
+  }
+
+  size_t size() {
+    size_t value = 0;
+    for (auto r : getRanges()) {
+      value += r.size();
+    }
+    return value;
+  }
+
+  int draw() {
+    std::uniform_int_distribution<size_t> distribution(0, size()-1);
+    size_t element_idx = distribution(MultiRange::generator);
+    for (auto r : getRanges()) {
+      if (element_idx < r.size()) {
+        return r.getLowerBound().getValue() + int(element_idx);
+      }
+      element_idx -= r.size();
+    }
+    throw MultiRangeDrawOutOfRangeException();
+  }
+
 private:
   RangeSet mRanges;
 
 };
 
+
+std::default_random_engine MultiRange::generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
 
 #endif
