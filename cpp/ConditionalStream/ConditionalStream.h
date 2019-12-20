@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <type_traits>
-#include <tuple>
 
 
 class ConditionalStream {
@@ -13,23 +12,23 @@ public:
   bool enabled() const { return mEnabled; }
   void setEnabled(const bool& inEnabled) { mEnabled = inEnabled; }
 
-  template <int I, typename... Elements>
-  static typename std::enable_if<(I == sizeof...(Elements)), std::ostream&>::type
-  _stream(std::ostream& os, const std::tuple<const Elements&...>& elements) {
-    return os;
+  template <typename Element, typename... Elements>
+  typename std::enable_if<(sizeof...(Elements) == 0), std::ostream&>::type
+  _stream(const Element& element, const Elements&... elements) const {
+    return mStream << element;
   }
 
-  template <int I, typename... Elements>
-  static typename std::enable_if<(I < sizeof...(Elements)), std::ostream&>::type
-  _stream(std::ostream& os, const std::tuple<const Elements&...>& elements) {
-    os << std::get<I>(elements);
-    _stream<I+1, Elements...>(os, elements);
-    return os;
+  template <typename Element, typename... Elements>
+  typename std::enable_if<(sizeof...(Elements) != 0), std::ostream&>::type
+  _stream(const Element& element, const Elements&... elements) const {
+    mStream << element;
+    _stream<Elements...>(elements...);
+    return mStream;
   }
 
   template <typename... Elements>
   std::ostream& stream(const Elements&... elements) const {
-    if (enabled()) _stream<0, Elements...>(mStream, std::tuple<const Elements&...>(elements...));
+    if (enabled()) _stream(elements...);
     return mStream;
   }
 
