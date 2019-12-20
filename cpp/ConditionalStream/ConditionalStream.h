@@ -6,49 +6,46 @@
 #include <tuple>
 
 
-template <typename... Elements>
 class ConditionalStream {
 public:
-  ConditionalStream(Elements... elements): mElements(elements...) {}
+  ConditionalStream(std::ostream& os): mStream(os), mEnabled(true) {}
 
   bool enabled() const { return mEnabled; }
   void setEnabled(const bool& inEnabled) { mEnabled = inEnabled; }
 
-  template <int I>
-  typename std::enable_if<(I == sizeof...(Elements)), std::ostream&>::type
-  _stream(std::ostream& os, const std::tuple<Elements...>& elements) const {
+  template <int I, typename... Elements>
+  static typename std::enable_if<(I == sizeof...(Elements)), std::ostream&>::type
+  _stream(std::ostream& os, const std::tuple<const Elements&...>& elements) {
     return os;
   }
 
-  template <int I>
-  typename std::enable_if<(I < sizeof...(Elements)), std::ostream&>::type
-  _stream(std::ostream& os, const std::tuple<Elements...>& elements) const {
+  template <int I, typename... Elements>
+  static typename std::enable_if<(I < sizeof...(Elements)), std::ostream&>::type
+  _stream(std::ostream& os, const std::tuple<const Elements&...>& elements) {
     os << std::get<I>(elements);
-    _stream<I+1>(os, elements);
+    _stream<I+1, Elements...>(os, elements);
     return os;
   }
 
-  std::ostream& stream(std::ostream& os) const {
-    _stream<0>(os, mElements);
-    return os;
+  template <typename... Elements>
+  std::ostream& stream(const Elements&... elements) const {
+    if (enabled()) _stream<0, Elements...>(mStream, std::tuple<const Elements&...>(elements...));
+    return mStream;
   }
 
-  inline friend std::ostream& operator<<(std::ostream& os, const ConditionalStream& cs) {
-    if (cs.enabled()) return cs.stream(os);
-    return os;
-  }
+  struct EndlineProxy {
+    friend std::ostream& operator<<(std::ostream& os, const ConditionalStream::EndlineProxy& inEndl) {
+      return os << std::endl;
+    }
+  };
+
+  const EndlineProxy& endl{};
 
 private:
-  std::tuple<Elements...> mElements;
+  std::ostream& mStream;
   bool mEnabled;
 
 };
-
-
-template <typename... Elements>
-ConditionalStream<Elements...> make_conditional_stream(Elements... elements) {
-  return ConditionalStream<Elements...>(elements...);
-}
 
 
 #endif
