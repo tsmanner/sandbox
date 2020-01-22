@@ -2,7 +2,8 @@
 
 <details>
   <summary>C++ Main.cpp Template</summary>
-  ``` cpp
+  
+  ```c++
   #include <ostream>
   #include <iomanip>
   using std::cout;
@@ -12,6 +13,6 @@
 
   int main() {
     return 0;
-   }
+  }
   ```
 </details>
