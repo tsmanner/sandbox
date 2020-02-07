@@ -101,7 +101,7 @@ public:
   }
 
   // Entry point function that can use template deduction to allow
-  // users to provide data without explicitely providing the data
+  // users to provide data without explicitly providing the data
   // type.  Calls into the recursive _apply function.
   template <typename DataType>
   static constexpr typename std::enable_if<(sizeof...(Scrambles) != 0), DataType>::type
