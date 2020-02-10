@@ -43,10 +43,12 @@ std::ostream& stream(std::ostream& os, std::tuple<Types...> t) {
 // abcd -> acbd
 // 0123 -> 0213
 TEST_CASE("Query Interleave", "[interleave][query]") {
-  REQUIRE(Interleave<0, 3, 2>::query<0>() == 0);
-  REQUIRE(Interleave<0, 3, 2>::query<1>() == 2);
-  REQUIRE(Interleave<0, 3, 2>::query<2>() == 1);
-  REQUIRE(Interleave<0, 3, 2>::query<3>() == 3);
+  REQUIRE(Interleave<0, 5, 2>::query<0>() == 0);
+  REQUIRE(Interleave<0, 5, 2>::query<1>() == 2);
+  REQUIRE(Interleave<0, 5, 2>::query<2>() == 4);
+  REQUIRE(Interleave<0, 5, 2>::query<3>() == 1);
+  REQUIRE(Interleave<0, 5, 2>::query<4>() == 3);
+  REQUIRE(Interleave<0, 5, 2>::query<5>() == 5);
 }
 
 
