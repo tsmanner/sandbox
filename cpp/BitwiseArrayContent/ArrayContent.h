@@ -177,7 +177,7 @@ public:
   virtual DataType getScrambledContent() const { return scramble(this->getContent()); }
 
   // Assignment Operator - sets content wholesale
-  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->mContent; }
+  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->getContent(); }
 
 };
 
@@ -230,7 +230,7 @@ public:
   virtual DataType getScrambledContent() const { return mScrambledContent; }
 
   // Assignment Operator - sets content wholesale
-  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->mContent; }
+  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->getContent(); }
 
 private:
   DataType mScrambledContent { 0 };
