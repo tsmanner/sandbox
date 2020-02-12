@@ -98,4 +98,12 @@ int main() {
     << dec << setfill(' ')
     << endl;
 
+  cout
+    << hex
+    << "ArrayInstance.getField<0> = " << array.getField<0>() << endl
+    << "ArrayInstance.getField<1> = " << array.getField<1>() << endl
+    << "ArrayInstance.getField<2> = " << array.getField<2>() << endl
+    << "ArrayInstance.getField<3> = " << array.getField<3>() << endl
+    ;
+
 }

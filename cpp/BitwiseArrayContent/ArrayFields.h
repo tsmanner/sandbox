@@ -70,6 +70,33 @@ public:
   using DataType = typename ArrayField<MSB, LSB>::DataType;
 
   //
+  // Calculate Shift
+  //   Looks up the field recursively by index, calculating
+  //   the distance of this field's LSB from the LSB of
+  //   the containing array.
+  //
+
+  // Terminal call in template recursion, mask is returned
+  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(QueryIndex < NumFields and QueryIndex == CurrentIndex), DataType>::type
+  _calculate_shift() {
+    return LSB - CurrentField::LSB;
+  }
+
+  // Terminal call in template recursion, just keep looking
+  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(QueryIndex < NumFields and QueryIndex != CurrentIndex), DataType>::type
+  _calculate_shift() {
+    return _calculate_shift<QueryIndex, CurrentIndex+1, RemainingFields...>();
+  }
+
+  // Entry poing function
+  template <unsigned QueryIndex>
+  static constexpr DataType calculate_shift() {
+    return _calculate_shift<QueryIndex, 0, ArrayFieldTypes...>();
+  }
+
+  //
   // Calculate Mask
   //   Looks up the field recursively by index, calculating
   //   the mask that covers the Field's bit range within
@@ -81,7 +108,7 @@ public:
   template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
   static constexpr typename std::enable_if<(QueryIndex < NumFields and QueryIndex == CurrentIndex), DataType>::type
   _calculate_mask() {
-    return (std::numeric_limits<DataType>::max() >> (std::numeric_limits<DataType>::digits - CurrentField::WIDTH)) << (LSB - CurrentField::LSB);
+    return (std::numeric_limits<DataType>::max() >> (std::numeric_limits<DataType>::digits - CurrentField::WIDTH)) << calculate_shift<QueryIndex>();
   }
 
   // Terminal call in template recursion, just keep looking
@@ -163,6 +190,12 @@ public:
   //   set must be called with exactly one argument per field
   ArrayFields(const typename ArrayFieldTypes::DataType&... inValues) {
     set(inValues...);
+  }
+
+  // Get a field by Field Index
+  template <unsigned QueryIndex>
+  DataType getField() const {
+    return (mContent & calculate_mask<QueryIndex>()) >> calculate_shift<QueryIndex>();
   }
 
   // Get the concatenated array content
