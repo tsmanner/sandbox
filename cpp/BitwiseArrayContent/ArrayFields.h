@@ -198,6 +198,13 @@ public:
     return (mContent & calculate_mask<QueryIndex>()) >> calculate_shift<QueryIndex>();
   }
 
+  // Set a field by Field Index
+  template <unsigned QueryIndex>
+  void setField(const DataType& inValue) {
+    // Clear the range in mContent and set the new data
+    mContent = (mContent & ~calculate_mask<QueryIndex>()) | (inValue << calculate_shift<QueryIndex>());
+  }
+
   // Get the concatenated array content
   const DataType& getContent() const { return mContent; }
 

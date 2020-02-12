@@ -82,17 +82,41 @@ int main() {
     << "query<17>: " << ArrayType::query<17>() << endl
     << "query<18>: " << ArrayType::query<18>() << endl
     << "query<19>: " << ArrayType::query<19>() << endl
-    ;
+    << endl;
 
   cout
-    << "ArrayInstance.mContent = 0x"
+    << "ArrayInstance.getContent   = 0x"
     << hex << setfill('0')
     << std::bitset<20>(array.getContent())
     << dec << setfill(' ')
     << endl;
 
   cout
-    << "ArrayInstance.mContent (Scrambled) = 0x"
+    << "ArrayInstance.getScrambled = 0x"
+    << hex << setfill('0')
+    << std::bitset<20>(array.getScrambledContent())
+    << dec << setfill(' ')
+    << endl;
+
+  cout
+    << hex
+    << "ArrayInstance.getField<0> = " << array.getField<0>() << endl
+    << "ArrayInstance.getField<1> = " << array.getField<1>() << endl
+    << "ArrayInstance.getField<2> = " << array.getField<2>() << endl
+    << "ArrayInstance.getField<3> = " << array.getField<3>() << endl
+    ;
+
+  cout << endl << "ArrayInstance.setField<0>(0x1ff)" << endl;
+  array.setField<2>(0x1f0);
+  cout
+    << "ArrayInstance.getContent   = 0x"
+    << hex << setfill('0')
+    << std::bitset<20>(array.getContent())
+    << dec << setfill(' ')
+    << endl;
+
+  cout
+    << "ArrayInstance.getScrambled = 0x"
     << hex << setfill('0')
     << std::bitset<20>(array.getScrambledContent())
     << dec << setfill(' ')

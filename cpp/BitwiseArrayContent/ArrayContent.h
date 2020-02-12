@@ -145,6 +145,13 @@ public:
     mScrambledContent = apply(this->getContent());
   }
 
+  // Set a field by Field Index and update scrambled content
+  template <unsigned QueryIndex>
+  void setField(const DataType& inValue) {
+    ArrayFieldsType::template setField<QueryIndex>(inValue);
+    mScrambledContent = apply(this->getContent());
+  }
+
   // Get the scrambled content
   const DataType& getScrambledContent() const { return mScrambledContent; }
 
