@@ -131,8 +131,35 @@ public:
   ArrayContent(
     const ArgTypes&... inArgs
   ):
-    ArrayFieldsType(inArgs...),
-    mScrambledContent(apply(this->getContent()))
+    ArrayFieldsType(inArgs...)
+  {
+  }
+
+  // Calculate and return the scrambled content
+  virtual DataType getScrambledContent() const { return apply(this->getContent()); }
+
+};
+
+
+
+template <typename ArrayFieldsType_t, typename... ScrambleTypes>
+class BufferedArrayContent : public ArrayContent<ArrayFieldsType_t, ScrambleTypes...> {
+public:
+  using ArrayFieldsType = ArrayFieldsType_t;
+  using DataType = typename ArrayFieldsType::DataType;
+  static const unsigned MSB = ArrayFieldsType::MSB;
+  static const unsigned LSB = ArrayFieldsType::LSB;
+
+  // Default Constructor
+  BufferedArrayContent(): ArrayContent<ArrayFieldsType_t, ScrambleTypes...>() {}
+
+  // Variadic Constructor to set all values
+  template <typename... ArgTypes>
+  BufferedArrayContent(
+    const ArgTypes&... inArgs
+  ):
+    ArrayContent<ArrayFieldsType_t, ScrambleTypes...>(inArgs...),
+    mScrambledContent(this->apply(this->getContent()))
   {
   }
 
@@ -142,18 +169,18 @@ public:
   typename std::enable_if<(sizeof...(ArgTypes) == ArrayFieldsType::NumFields)>::type
   set(const ArgTypes&... inArgs) {
     ArrayFieldsType::set(inArgs...);
-    mScrambledContent = apply(this->getContent());
+    mScrambledContent = this->apply(this->getContent());
   }
 
   // Set a field by Field Index and update scrambled content
   template <unsigned QueryIndex>
   void setField(const DataType& inValue) {
     ArrayFieldsType::template setField<QueryIndex>(inValue);
-    mScrambledContent = apply(this->getContent());
+    mScrambledContent = this->apply(this->getContent());
   }
 
-  // Get the scrambled content
-  const DataType& getScrambledContent() const { return mScrambledContent; }
+  // Get the buffered scrambled content
+  virtual DataType getScrambledContent() const { return mScrambledContent; }
 
 private:
   DataType mScrambledContent { 0 };

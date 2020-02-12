@@ -20,7 +20,7 @@ using std::unordered_set;
 
 
 int main() {
-  using ArrayType = ArrayContent<
+  using ArrayType = BufferedArrayContent<
     ArrayFields<
       ArrayField<2, 6>,
       ArrayField<0>,
