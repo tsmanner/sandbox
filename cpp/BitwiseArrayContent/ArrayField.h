@@ -23,7 +23,7 @@ struct ArrayFieldRange<Start, End, Val, typename std::enable_if<Val >= Start && 
 //
 
 // Default specialization only provides a WIDTH, MSB, and LSB
-template <unsigned MSB_t, unsigned LSB_t, class Enable = void>
+template <unsigned MSB_t, unsigned LSB_t=MSB_t, class Enable = void>
 class ArrayField {
 public:
   static constexpr unsigned WIDTH = LSB_t - MSB_t + 1;
@@ -31,11 +31,11 @@ public:
   static const unsigned LSB = LSB_t;
 };
 
-// Range [0-8] specialization defines DataType to be uint8_t,
+// Range [1-8] specialization defines DataType to be uint8_t,
 // and provides a member, constructor, assignment, and cast
 // operators for that type
 template <unsigned MSB_t, unsigned LSB_t>
-class ArrayField<MSB_t, LSB_t, typename ArrayFieldRange<0, 8, LSB_t-MSB_t+1>::enabled> {
+class ArrayField<MSB_t, LSB_t, typename ArrayFieldRange<1, 8, LSB_t-MSB_t+1>::enabled> {
 public:
   static constexpr unsigned WIDTH = LSB_t - MSB_t + 1;
   static const unsigned MSB = MSB_t;
