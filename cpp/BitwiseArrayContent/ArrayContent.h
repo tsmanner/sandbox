@@ -161,9 +161,6 @@ public:
     return data;
   }
 
-
-
-
   // Default Constructor
   ArrayContent(): ArrayFieldsType() {}
 
@@ -180,7 +177,7 @@ public:
   virtual DataType getScrambledContent() const { return scramble(this->getContent()); }
 
   // Assignment Operator - sets content wholesale
-  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->getContent(); }
+  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->mContent; }
 
 };
 
@@ -233,7 +230,7 @@ public:
   virtual DataType getScrambledContent() const { return mScrambledContent; }
 
   // Assignment Operator - sets content wholesale
-  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->getContent(); }
+  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->mContent; }
 
 private:
   DataType mScrambledContent { 0 };

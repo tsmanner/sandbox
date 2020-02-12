@@ -215,7 +215,7 @@ public:
   void setContent(const DataType& inContent) { mContent = inContent; }
 
   // Assignment Operator - sets content wholesale
-  DataType& operator=(const DataType& inContent) { setContent(inContent); return getContent(); }
+  DataType& operator=(const DataType& inContent) { setContent(inContent); return mContent; }
 
 private:
   DataType mContent { 0 };
