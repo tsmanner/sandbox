@@ -186,7 +186,10 @@ public:
     mContent = _set<0, ArgTypes...>(inArgs...);
   }
 
-  // Update the content
+  // Default Constructor
+  ArrayFields() {}
+
+  // Value Constructor
   //   set must be called with exactly one argument per field
   ArrayFields(const typename ArrayFieldTypes::DataType&... inValues) {
     set(inValues...);
@@ -209,7 +212,7 @@ public:
   const DataType& getContent() const { return mContent; }
 
 private:
-  DataType mContent;
+  DataType mContent { 0 };
 
 };
 

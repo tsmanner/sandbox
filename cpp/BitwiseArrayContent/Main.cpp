@@ -30,6 +30,8 @@ int main() {
     Interleave<0, 15, 2>
   >;
 
+  auto array = ArrayType();
+
   cout
     << "ArrayType<"
     << ArrayType::MSB
@@ -46,7 +48,7 @@ int main() {
     << "  mask<3>: " << ArrayType::calculate_mask<3>() << endl
     ;
 
-  auto array = ArrayType(0, 0, 0, 0);
+  array = ArrayType(0, 0, 0, 0);
   cout
     << "ArrayInstance.mContent = 0x"
     << hex << setfill('0')
