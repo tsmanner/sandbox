@@ -86,7 +86,7 @@ public:
   }
 
   //
-  // Apply
+  // scramble
   //   Applies the ScrambleTypes to an actual data value by
   //   recursively iterating over each bit and cascading
   //   a mask, shift, and bitwise OR.
@@ -95,33 +95,74 @@ public:
   // Terminal call in template recursion.  The final bit is returned.
   template <int I>
   static constexpr typename std::enable_if<(I == LSB), DataType>::type
-  _apply(const DataType& data) {
+  _scramble(const DataType& data) {
     return shift_bits<calculate_shift<I>()>(data & calculate_bit_mask<I>());
   }
 
   // Recursive call that bitwise ORs this bit with the next one
   template <int I=MSB>
   static constexpr typename std::enable_if<(I < LSB), DataType>::type
-  _apply(const DataType& data) {
-    return (shift_bits<calculate_shift<I>()>(data & calculate_bit_mask<I>())) | _apply<I+1>(data);
+  _scramble(const DataType& data) {
+    return (shift_bits<calculate_shift<I>()>(data & calculate_bit_mask<I>())) | _scramble<I+1>(data);
   }
 
   // Entry point function that can use template deduction to allow
   // users to provide data without explicitly providing the data
-  // type.  Calls into the recursive _apply function.
+  // type.  Calls into the recursive _scramble function.
   template <typename ReturnType = DataType>
   static constexpr typename std::enable_if<(sizeof...(ScrambleTypes) != 0), ReturnType>::type
-  apply(const DataType& data) {
-    return _apply(data);
+  scramble(const DataType& data) {
+    return _scramble(data);
   }
 
-  // Entry point function enabled if there are no ScrambleTypes to apply,
+  // Entry point function enabled if there are no ScrambleTypes to scramble,
   // that just returns the data without modification.
   template <typename ReturnType = DataType>
   static constexpr typename std::enable_if<(sizeof...(ScrambleTypes) == 0), ReturnType>::type
-  apply(const DataType& data) {
+  scramble(const DataType& data) {
     return data;
   }
+
+  //
+  // unscramble
+  //   Applies the ScrambleTypes to an actual data value,
+  //   in reverse, by recursively iterating over each bit
+  //   and cascading a mask, shift, and bitwise OR.
+  //
+
+  // Terminal call in template recursion.  The final bit is returned.
+  template <int I>
+  static constexpr typename std::enable_if<(I == LSB), DataType>::type
+  _unscramble(const DataType& data) {
+    return shift_bits<0-calculate_shift<I>()>(data & calculate_bit_mask<I>());
+  }
+
+  // Recursive call that bitwise ORs this bit with the next one
+  template <int I=MSB>
+  static constexpr typename std::enable_if<(I < LSB), DataType>::type
+  _unscramble(const DataType& data) {
+    return (shift_bits<0-calculate_shift<I>()>(data & calculate_bit_mask<query<I>()>())) | _unscramble<I+1>(data);
+  }
+
+  // Entry point function that can use template deduction to allow
+  // users to provide data without explicitly providing the data
+  // type.  Calls into the recursive _scramble function.
+  template <typename ReturnType = DataType>
+  static constexpr typename std::enable_if<(sizeof...(ScrambleTypes) != 0), ReturnType>::type
+  unscramble(const DataType& data) {
+    return _unscramble(data);
+  }
+
+  // Entry point function enabled if there are no ScrambleTypes to scramble,
+  // that just returns the data without modification.
+  template <typename ReturnType = DataType>
+  static constexpr typename std::enable_if<(sizeof...(ScrambleTypes) == 0), ReturnType>::type
+  unscramble(const DataType& data) {
+    return data;
+  }
+
+
+
 
   // Default Constructor
   ArrayContent(): ArrayFieldsType() {}
@@ -136,7 +177,7 @@ public:
   }
 
   // Calculate and return the scrambled content
-  virtual DataType getScrambledContent() const { return apply(this->getContent()); }
+  virtual DataType getScrambledContent() const { return scramble(this->getContent()); }
 
   // Assignment Operator - sets content wholesale
   DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->getContent(); }
@@ -162,7 +203,7 @@ public:
     const ArgTypes&... inArgs
   ):
     ArrayContent<ArrayFieldsType_t, ScrambleTypes...>(inArgs...),
-    mScrambledContent(this->apply(this->getContent()))
+    mScrambledContent(this->scramble(this->getContent()))
   {
   }
 
@@ -172,20 +213,20 @@ public:
   typename std::enable_if<(sizeof...(ArgTypes) == ArrayFieldsType::NumFields)>::type
   set(const ArgTypes&... inArgs) {
     ArrayFieldsType::set(inArgs...);
-    mScrambledContent = this->apply(this->getContent());
+    mScrambledContent = this->scramble(this->getContent());
   }
 
   // Set a field by Field Index and update scrambled content
   template <unsigned QueryIndex>
   void setField(const DataType& inValue) {
     ArrayFieldsType::template setField<QueryIndex>(inValue);
-    mScrambledContent = this->apply(this->getContent());
+    mScrambledContent = this->scramble(this->getContent());
   }
 
   // Set content, wholesale
   void setContent(const DataType& inContent) {
     ArrayFieldsType::setContent(inContent);
-    mScrambledContent = this->apply(this->getContent());
+    mScrambledContent = this->scramble(this->getContent());
   }
 
   // Get the buffered scrambled content

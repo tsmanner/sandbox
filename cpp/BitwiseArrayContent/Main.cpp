@@ -126,6 +126,13 @@ int main() {
     << endl;
 
   cout
+    << "ArrayInstance.unscramble   = 0b"
+    << hex << setfill('0')
+    << std::bitset<20>(ArrayType::unscramble(array.getScrambledContent()))
+    << dec << setfill(' ')
+    << endl;
+
+  cout
     << hex
     << "ArrayInstance.getField<0> = " << array.getField<0>() << endl
     << "ArrayInstance.getField<1> = " << array.getField<1>() << endl
