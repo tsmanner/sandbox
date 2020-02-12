@@ -123,13 +123,33 @@ public:
     return data;
   }
 
+  // Default Constructor
+  ArrayContent(): ArrayFieldsType() {}
 
+  // Variadic Constructor to set all values
   template <typename... ArgTypes>
-  ArrayContent(const ArgTypes&... inArgs): ArrayFieldsType(inArgs...) {}
-
-  DataType getScrambledContent() const {
-    return apply(this->getContent());
+  ArrayContent(
+    const ArgTypes&... inArgs
+  ):
+    ArrayFieldsType(inArgs...),
+    mScrambledContent(apply(this->getContent()))
+  {
   }
+
+  // Update the unscrambled and scrambled content
+  //   set must be called with exactly one argument per field
+  template <typename... ArgTypes>
+  typename std::enable_if<(sizeof...(ArgTypes) == ArrayFieldsType::NumFields)>::type
+  set(const ArgTypes&... inArgs) {
+    ArrayFieldsType::set(inArgs...);
+    mScrambledContent = apply(this->getContent());
+  }
+
+  // Get the scrambled content
+  const DataType& getScrambledContent() const { return mScrambledContent; }
+
+private:
+  DataType mScrambledContent { 0 };
 
 };
 

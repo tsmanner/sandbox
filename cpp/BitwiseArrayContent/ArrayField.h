@@ -4,13 +4,25 @@
 #include <type_traits>
 
 
+// ArrayFieldRange
+//   Enable class for ArrayField to allow partial template
+//   specialization of the structs below to define a different
+//   data type depending on the distance between MSB and LSB
+
+// Default specialization has no "enabled" typedef
 template<int Start, int End, int Val, class Enable = void> struct ArrayFieldRange {};
 
+// If "Val" lies between Start and End, inclusive,
+// an "enabled" typedef
 template<int Start, int End, int Val>
 struct ArrayFieldRange<Start, End, Val, typename std::enable_if<Val >= Start && Val <= End>::type> {
   using enabled = void;
 };
 
+// ArrayField
+//
+
+// Default specialization only provides a WIDTH, MSB, and LSB
 template <unsigned MSB_t, unsigned LSB_t, class Enable = void>
 class ArrayField {
 public:
@@ -19,6 +31,9 @@ public:
   static const unsigned LSB = LSB_t;
 };
 
+// Range [0-8] specialization defines DataType to be uint8_t,
+// and provides a member, constructor, assignment, and cast
+// operators for that type
 template <unsigned MSB_t, unsigned LSB_t>
 class ArrayField<MSB_t, LSB_t, typename ArrayFieldRange<0, 8, LSB_t-MSB_t+1>::enabled> {
 public:
@@ -35,6 +50,9 @@ private:
   uint8_t mValue;
 };
 
+// Range [9-16] specialization defines DataType to be uint16_t,
+// and provides a member, constructor, assignment, and cast
+// operators for that type
 template <unsigned MSB_t, unsigned LSB_t>
 class ArrayField<MSB_t, LSB_t, typename ArrayFieldRange<9, 16, LSB_t-MSB_t+1>::enabled> {
 public:
@@ -52,7 +70,9 @@ private:
 
 };
 
-
+// Range [17-32] specialization defines DataType to be uint32_t,
+// and provides a member, constructor, assignment, and cast
+// operators for that type
 template <unsigned MSB_t, unsigned LSB_t>
 class ArrayField<MSB_t, LSB_t, typename ArrayFieldRange<17, 32, LSB_t-MSB_t+1>::enabled> {
 public:
@@ -70,7 +90,9 @@ private:
 
 };
 
-
+// Range [33-64] specialization defines DataType to be uint64_t,
+// and provides a member, constructor, assignment, and cast
+// operators for that type
 template <unsigned MSB_t, unsigned LSB_t>
 class ArrayField<MSB_t, LSB_t, typename ArrayFieldRange<33, 64, LSB_t-MSB_t+1>::enabled> {
 public:
