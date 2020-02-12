@@ -211,6 +211,12 @@ public:
   // Get the concatenated array content
   const DataType& getContent() const { return mContent; }
 
+  // Set content, wholesale
+  void setContent(const DataType& inContent) { mContent = inContent; }
+
+  // Assignment Operator - sets content wholesale
+  DataType& operator=(const DataType& inContent) { setContent(inContent); return getContent(); }
+
 private:
   DataType mContent { 0 };
 

@@ -31,6 +31,7 @@ int main() {
   >;
 
   auto array = ArrayType();
+  array.setContent(0b10101010101010101010);
 
   cout
     << "ArrayType<"

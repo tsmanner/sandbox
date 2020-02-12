@@ -138,6 +138,9 @@ public:
   // Calculate and return the scrambled content
   virtual DataType getScrambledContent() const { return apply(this->getContent()); }
 
+  // Assignment Operator - sets content wholesale
+  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->getContent(); }
+
 };
 
 
@@ -179,8 +182,17 @@ public:
     mScrambledContent = this->apply(this->getContent());
   }
 
+  // Set content, wholesale
+  void setContent(const DataType& inContent) {
+    ArrayFieldsType::setContent(inContent);
+    mScrambledContent = this->apply(this->getContent());
+  }
+
   // Get the buffered scrambled content
   virtual DataType getScrambledContent() const { return mScrambledContent; }
+
+  // Assignment Operator - sets content wholesale
+  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->getContent(); }
 
 private:
   DataType mScrambledContent { 0 };
