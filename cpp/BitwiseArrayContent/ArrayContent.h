@@ -134,7 +134,7 @@ public:
   template <int I>
   static constexpr typename std::enable_if<(I == LSB), DataType>::type
   _unscramble(const DataType& data) {
-    return shift_bits<0-calculate_shift<I>()>(data & calculate_bit_mask<I>());
+    return shift_bits<0-calculate_shift<I>()>(data & calculate_bit_mask<query<I>()>());
   }
 
   // Recursive call that bitwise ORs this bit with the next one
