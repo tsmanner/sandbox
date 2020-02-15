@@ -9,8 +9,8 @@ class ArrayContent : public ArrayFieldsType_t {
 public:
   using ArrayFieldsType = ArrayFieldsType_t;
   using DataType = typename ArrayFieldsType::DataType;
-  static const unsigned MSB = ArrayFieldsType::MSB;
-  static const unsigned LSB = ArrayFieldsType::LSB;
+  static const DataType MSB = ArrayFieldsType::MSB;
+  static const DataType LSB = ArrayFieldsType::LSB;
 
   //
   // Index Query
@@ -21,7 +21,7 @@ public:
 
   // Terminal call in template recursion.  Only called on the last scramble,
   // returning the index query for it.
-  template <int INDEX, typename CurrentScramble, typename... RemainingScrambleTypes>
+  template <DataType INDEX, typename CurrentScramble, typename... RemainingScrambleTypes>
   static constexpr typename std::enable_if<(sizeof...(RemainingScrambleTypes) == 0), int>::type
   _query() {
     return CurrentScramble::template query<INDEX>();
@@ -29,7 +29,7 @@ public:
 
   // Recursive call that will forward the query from the current scramble
   // to the next one.  Enabled for all but the final scramble.
-  template <int INDEX, typename CurrentScramble, typename... RemainingScrambleTypes>
+  template <DataType INDEX, typename CurrentScramble, typename... RemainingScrambleTypes>
   static constexpr typename std::enable_if<(sizeof...(RemainingScrambleTypes) != 0), int>::type
   _query() {
     return _query<CurrentScramble::template query<INDEX>(), RemainingScrambleTypes...>();
@@ -37,7 +37,7 @@ public:
 
   // Entry point to query, sugar to make the front-end cleaner
   // by not requiring users to list the ScrambleTypes again.
-  template <int INDEX>
+  template <DataType INDEX>
   static constexpr int query() {
     return _query<INDEX, ScrambleTypes...>();
   }
@@ -45,9 +45,9 @@ public:
   //
   // Mask calculation for the bit described by index
   //
-  template <int INDEX>
-  static constexpr int calculate_bit_mask() {
-    return DataType(1) << (LSB - INDEX - 2*MSB);
+  template <DataType INDEX>
+  static constexpr DataType calculate_bit_mask() {
+    return DataType(1) << (LSB - INDEX - (2 * MSB));
   }
 
   //
@@ -64,23 +64,23 @@ public:
   // Perform a right shift, allowing for negative distances
   //
 
-  // Negative shift - shift left by the absolute value of I
-  template <int I>
-  static constexpr typename std::enable_if<(I < 0), DataType>::type
+  // Negative shift - shift left by the absolute value of SHIFT
+  template <int SHIFT>
+  static constexpr typename std::enable_if<(SHIFT < 0), DataType>::type
   shift_bits(const DataType& data) {
-    return data << (0 - I);
+    return data << (0 - SHIFT);
   }
 
-  // Positive shift - shift right by I
-  template <int I>
-  static constexpr typename std::enable_if<(I > 0), DataType>::type
+  // Positive shift - shift right by SHIFT
+  template <int SHIFT>
+  static constexpr typename std::enable_if<(SHIFT > 0), DataType>::type
   shift_bits(const DataType& data) {
-    return data >> I;
+    return data >> SHIFT;
   }
 
   // No shift - just return the data
-  template <int I>
-  static constexpr typename std::enable_if<(I == 0), DataType>::type
+  template <int SHIFT>
+  static constexpr typename std::enable_if<(SHIFT == 0), DataType>::type
   shift_bits(const DataType& data) {
     return data;
   }
@@ -93,17 +93,17 @@ public:
   //
 
   // Terminal call in template recursion.  The final bit is returned.
-  template <int I>
-  static constexpr typename std::enable_if<(I == LSB), DataType>::type
+  template <DataType INDEX>
+  static constexpr typename std::enable_if<(INDEX == LSB), DataType>::type
   _scramble(const DataType& data) {
-    return shift_bits<calculate_shift<I>()>(data & calculate_bit_mask<I>());
+    return shift_bits<calculate_shift<INDEX>()>(data & calculate_bit_mask<INDEX>());
   }
 
   // Recursive call that bitwise ORs this bit with the next one
-  template <int I=MSB>
-  static constexpr typename std::enable_if<(I < LSB), DataType>::type
+  template <DataType INDEX=MSB>
+  static constexpr typename std::enable_if<(INDEX < LSB), DataType>::type
   _scramble(const DataType& data) {
-    return (shift_bits<calculate_shift<I>()>(data & calculate_bit_mask<I>())) | _scramble<I+1>(data);
+    return (shift_bits<calculate_shift<INDEX>()>(data & calculate_bit_mask<INDEX>())) | _scramble<INDEX+1>(data);
   }
 
   // Entry point function that can use template deduction to allow
@@ -131,17 +131,17 @@ public:
   //
 
   // Terminal call in template recursion.  The final bit is returned.
-  template <int I>
-  static constexpr typename std::enable_if<(I == LSB), DataType>::type
+  template <DataType INDEX>
+  static constexpr typename std::enable_if<(INDEX == LSB), DataType>::type
   _unscramble(const DataType& data) {
-    return shift_bits<0-calculate_shift<I>()>(data & calculate_bit_mask<query<I>()>());
+    return shift_bits<0-calculate_shift<INDEX>()>(data & calculate_bit_mask<query<INDEX>()>());
   }
 
   // Recursive call that bitwise ORs this bit with the next one
-  template <int I=MSB>
-  static constexpr typename std::enable_if<(I < LSB), DataType>::type
+  template <DataType INDEX=MSB>
+  static constexpr typename std::enable_if<(INDEX < LSB), DataType>::type
   _unscramble(const DataType& data) {
-    return (shift_bits<0-calculate_shift<I>()>(data & calculate_bit_mask<query<I>()>())) | _unscramble<I+1>(data);
+    return (shift_bits<0-calculate_shift<INDEX>()>(data & calculate_bit_mask<query<INDEX>()>())) | _unscramble<INDEX+1>(data);
   }
 
   // Entry point function that can use template deduction to allow

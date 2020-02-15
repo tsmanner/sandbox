@@ -4,36 +4,30 @@
 #include <type_traits>
 
 #include "ArrayField.h"
+#include "ArraySubFields.h"
 
 
-template <typename... ArrayFieldTypes>
-class ArrayFields {
-public:
-  static constexpr unsigned NumFields = sizeof...(ArrayFieldTypes);
+namespace ArrayFieldsUtility {
 
   //
   // Template Recursive MSB Calculation
   //
 
   template <unsigned CurrentMSB, typename CurrentField, typename... RemainingFields>
-  static constexpr typename std::enable_if<(sizeof...(RemainingFields) == 0), unsigned>::type
+  constexpr typename std::enable_if<(sizeof...(RemainingFields) == 0), unsigned>::type
   _calculate_msb() {
     return (CurrentMSB <= CurrentField::MSB) ? CurrentMSB : CurrentField::MSB;
   }
 
   template <unsigned CurrentMSB, typename CurrentField, typename... RemainingFields>
-  static constexpr typename std::enable_if<(sizeof...(RemainingFields) != 0), unsigned>::type
+  constexpr typename std::enable_if<(sizeof...(RemainingFields) != 0), unsigned>::type
   _calculate_msb() {
     return _calculate_msb<(CurrentMSB <= CurrentField::MSB) ? CurrentMSB : CurrentField::MSB, RemainingFields...>();
   }
 
   template <typename FirstField, typename... RemainingFields>
-  static constexpr unsigned _calculate_msb_entry_point() {
+  constexpr unsigned calculate_msb() {
     return _calculate_msb<FirstField::MSB, RemainingFields...>();
-  }
-
-  static constexpr unsigned calculate_msb() {
-    return _calculate_msb_entry_point<ArrayFieldTypes...>();
   }
 
   //
@@ -41,33 +35,50 @@ public:
   //
 
   template <unsigned CurrentLSB, typename CurrentField, typename... RemainingFields>
-  static constexpr typename std::enable_if<(sizeof...(RemainingFields) == 0), unsigned>::type
+  constexpr typename std::enable_if<(sizeof...(RemainingFields) == 0), unsigned>::type
   _calculate_lsb() {
     return (CurrentLSB >= CurrentField::LSB) ? CurrentLSB : CurrentField::LSB;
   }
 
   template <unsigned CurrentLSB, typename CurrentField, typename... RemainingFields>
-  static constexpr typename std::enable_if<(sizeof...(RemainingFields) != 0), unsigned>::type
+  constexpr typename std::enable_if<(sizeof...(RemainingFields) != 0), unsigned>::type
   _calculate_lsb() {
     return _calculate_lsb<(CurrentLSB >= CurrentField::LSB) ? CurrentLSB : CurrentField::LSB, RemainingFields...>();
   }
 
   template <typename FirstField, typename... RemainingFields>
-  static constexpr unsigned _calculate_lsb_entry_point() {
+  constexpr unsigned calculate_lsb() {
     return _calculate_lsb<FirstField::LSB, RemainingFields...>();
   }
 
-  static constexpr unsigned calculate_lsb() {
-    return _calculate_lsb_entry_point<ArrayFieldTypes...>();
-  }
+}  // namespace ArrayFieldsUtility
 
-  // Provide MSB and LSB as const unsigned values
-  static constexpr unsigned MSB = calculate_msb();
-  static constexpr unsigned LSB = calculate_lsb();
 
-  // Use a dummy ArrayField to figure out what size of
-  // unsigned integer we should use to store the content in.
-  using DataType = typename ArrayField<MSB, LSB>::DataType;
+class ArrayFieldsBase {};
+
+
+template <typename... ArrayFieldTypes>
+class ArrayFields :
+  public ArrayFieldsBase,
+  public ArrayField<
+    ArrayFieldsUtility::calculate_msb<ArrayFieldTypes...>(),
+    ArrayFieldsUtility::calculate_lsb<ArrayFieldTypes...>()
+  >
+{
+public:
+
+  using ArrayFieldType = ArrayField<
+    ArrayFieldsUtility::calculate_msb<ArrayFieldTypes...>(),
+    ArrayFieldsUtility::calculate_lsb<ArrayFieldTypes...>()
+  >;
+
+  static constexpr unsigned NumFields = sizeof...(ArrayFieldTypes);
+
+  static const unsigned MSB = ArrayFieldType::MSB;
+  static const unsigned LSB = ArrayFieldType::LSB;
+  static const unsigned WIDTH = ArrayFieldType::WIDTH;
+  using DataType = typename ArrayFieldType::DataType;
+
 
   //
   // Calculate Shift
@@ -141,18 +152,27 @@ public:
   //   and masking the data into the right set of bits.
   //
 
-  // Terminal call in template recursion, mask and shift are applied and returned
-  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
-  typename std::enable_if<(QueryIndex < NumFields and QueryIndex == CurrentIndex), DataType>::type
-  _set_field(const DataType& inData) {
-    return (inData << (LSB - CurrentField::LSB)) & calculate_mask<QueryIndex>();
+  // Terminal call in template recursion for DataType
+  //    mask and shift are applied and returned
+  template <typename ArgType, unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static typename std::enable_if<(!std::is_base_of<ArrayFieldsBase, ArgType>::value and QueryIndex < NumFields and QueryIndex == CurrentIndex), DataType>::type
+  _calculate_field(const ArgType& inData) {
+    return (DataType(inData) << (LSB - CurrentField::LSB)) & calculate_mask<QueryIndex>();
+  }
+
+  // Terminal call in template recursion for non-DataType
+  //    mask and shift are applied and returned
+  template <typename ArgType, unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static typename std::enable_if<(std::is_base_of<ArrayFieldsBase, ArgType>::value and QueryIndex < NumFields and QueryIndex == CurrentIndex), DataType>::type
+  _calculate_field(const ArgType& inData) {
+    return DataType(inData.getContent()) << (LSB - CurrentField::LSB);
   }
 
   // Non-terminal call in template recursion, just keep looking
-  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
-  typename std::enable_if<(QueryIndex < NumFields and QueryIndex != CurrentIndex), DataType>::type
-  _set_field(const DataType& inData) {
-    return _set_field<QueryIndex, CurrentIndex+1, RemainingFields...>(inData);
+  template <typename ArgType, unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static typename std::enable_if<(QueryIndex < NumFields and QueryIndex != CurrentIndex), DataType>::type
+  _calculate_field(const ArgType& inData) {
+    return _calculate_field<ArgType, QueryIndex, CurrentIndex+1, RemainingFields...>(inData);
   }
 
   //
@@ -164,26 +184,33 @@ public:
 
   // Terminal call in template recursion, final field is returned
   template <unsigned I, typename CurrentArgType, typename... RemainingArgTypes>
-  typename std::enable_if<(sizeof...(RemainingArgTypes) == 0), DataType>::type
-  _set(const CurrentArgType& inCurrentArg) {
-    return _set_field<I, 0, ArrayFieldTypes...>(inCurrentArg);
+  static typename std::enable_if<(sizeof...(RemainingArgTypes) == 0), DataType>::type
+  _calculate_content(const CurrentArgType& inCurrentArg) {
+    return _calculate_field<CurrentArgType, I, 0, ArrayFieldTypes...>(inCurrentArg);
   }
 
   // Non-terminal call in template recursion, intermediate field OR'd with
   // the next field is returned
   template <unsigned I, typename CurrentArgType, typename... RemainingArgTypes>
-  typename std::enable_if<(sizeof...(RemainingArgTypes) != 0), DataType>::type
-  _set(const CurrentArgType& inCurrentArg, const RemainingArgTypes&... inRemainingArgs) {
-    return _set_field<I, 0, ArrayFieldTypes...>(inCurrentArg) | _set<I+1, RemainingArgTypes...>(inRemainingArgs...);
+  static typename std::enable_if<(sizeof...(RemainingArgTypes) != 0), DataType>::type
+  _calculate_content(const CurrentArgType& inCurrentArg, const RemainingArgTypes&... inRemainingArgs) {
+    return _calculate_field<CurrentArgType, I, 0, ArrayFieldTypes...>(inCurrentArg) | _calculate_content<I+1, RemainingArgTypes...>(inRemainingArgs...);
+  }
+
+  // Entry point call to calculate content value
+  template <typename... ArgTypes>
+  static typename std::enable_if<(sizeof...(ArgTypes) != 0), DataType>::type
+  calculate_content(const ArgTypes&... inArgs) {
+    return _calculate_content<0, ArgTypes...>(inArgs...);
   }
 
   // Entry point function that initiates field setting
   // with FieldIndex of 0.  Requires exactly one argument
-  // per Field. Calls into the recursive _set function.
+  // per Field. Calls into the recursive _calculate_content function.
   template <typename... ArgTypes>
   typename std::enable_if<(sizeof...(ArgTypes) == NumFields)>::type
   set(const ArgTypes&... inArgs) {
-    mContent = _set<0, ArgTypes...>(inArgs...);
+    mContent = calculate_content(inArgs...);
   }
 
   // Default Constructor
@@ -191,7 +218,8 @@ public:
 
   // Value Constructor
   //   set must be called with exactly one argument per field
-  ArrayFields(const typename ArrayFieldTypes::DataType&... inValues) {
+  template <typename... ArgTypes>
+  ArrayFields(const ArgTypes&... inValues) {
     set(inValues...);
   }
 
@@ -216,7 +244,8 @@ public:
   void setContent(const DataType& inContent) { mContent = inContent; }
 
   // Assignment Operator - sets content wholesale
-  DataType& operator=(const DataType& inContent) { setContent(inContent); return getContent(); }
+  DataType& operator=(const DataType& inContent) { this->setContent(inContent); return this->getContent(); }
+  operator DataType() { return this->getContent(); }
 
 private:
   DataType mContent { 0 };
