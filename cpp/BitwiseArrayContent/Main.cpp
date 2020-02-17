@@ -19,7 +19,6 @@ using std::unordered_set;
 #include "../BitManipulation/Interleave.h"
 
 
-
 int main() {
   using Entry = ArrayFields<
     ArrayField<0, 3>,
@@ -68,7 +67,16 @@ int main() {
     << setw((ArrayType::WIDTH/4) + ((ArrayType::WIDTH % 4) ? 1 : 0))
     << array.getContent()
     << dec << setfill(' ')
-    << endl;
+    << endl
+    << "ArrayInstance.getField<0>() = "
+    << hex
+    << +array.getField<0>()
+    << endl
+    << "ArrayInstance.getField<1>().getField<0>() = "
+    << hex
+    << +array.getField<1>().getField<0>()
+    << endl
+    ;
 
   // array.set(
   //   0b11111,      // Field 0 - < 2: 6>

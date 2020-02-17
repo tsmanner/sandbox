@@ -225,8 +225,11 @@ public:
 
   // Get a field by Field Index
   template <unsigned QueryIndex>
-  DataType getField() const {
-    return (mContent & calculate_mask<QueryIndex>()) >> calculate_shift<QueryIndex>();
+  typename std::tuple_element<QueryIndex, std::tuple<ArrayFieldTypes...>>::type
+  getField() const {
+    typename std::tuple_element<QueryIndex, std::tuple<ArrayFieldTypes...>>::type field;
+    field = (mContent & calculate_mask<QueryIndex>()) >> calculate_shift<QueryIndex>();
+    return field;
   }
 
   // Set a field by Field Index
