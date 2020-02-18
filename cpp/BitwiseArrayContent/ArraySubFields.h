@@ -3,8 +3,8 @@
 
 #include <type_traits>
 
+#include "ArrayBaseClasses.h"
 
-class ArraySubFieldsBase {};
 
 
 template <unsigned MSB_t, unsigned LSB_t, typename ArrayFieldsType_t>
@@ -12,6 +12,7 @@ class ArraySubFields : public ArraySubFieldsBase, public ArrayFieldsType_t {
 public:
   using ArrayFieldsType = ArrayFieldsType_t;
   using DataType = typename ArrayFieldsType::DataType;
+  static const unsigned NumFields = ArrayFieldsType::NumFields;
   static const unsigned MSB = MSB_t;
   static const unsigned LSB = LSB_t;
   static const unsigned WIDTH = ArrayFieldsType::WIDTH;

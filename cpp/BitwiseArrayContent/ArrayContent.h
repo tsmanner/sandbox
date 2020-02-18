@@ -3,14 +3,19 @@
 
 #include <type_traits>
 
+#include "ArrayBaseClasses.h"
+
 
 template <typename ArrayFieldsType_t, typename... ScrambleTypes>
-class ArrayContent : public ArrayFieldsType_t {
+class ArrayContent : public ArrayContentBase, public ArrayFieldsType_t {
 public:
   using ArrayFieldsType = ArrayFieldsType_t;
   using DataType = typename ArrayFieldsType::DataType;
+  static const unsigned NumFields = ArrayFieldsType::NumFields;
+  static constexpr unsigned NumScrambles = sizeof...(ScrambleTypes);
   static const DataType MSB = ArrayFieldsType::MSB;
   static const DataType LSB = ArrayFieldsType::LSB;
+  static const unsigned WIDTH = ArrayFieldsType::WIDTH;
 
   //
   // Index Query
@@ -21,24 +26,39 @@ public:
 
   // Terminal call in template recursion.  Only called on the last scramble,
   // returning the index query for it.
-  template <DataType INDEX, typename CurrentScramble, typename... RemainingScrambleTypes>
-  static constexpr typename std::enable_if<(sizeof...(RemainingScrambleTypes) == 0), int>::type
+  template <unsigned INDEX, typename CurrentScramble, typename... RemainingScrambleTypes>
+  static constexpr typename std::enable_if<(
+    sizeof...(RemainingScrambleTypes) == 0
+  ), unsigned>::type
   _query() {
-    return CurrentScramble::template query<INDEX>();
+    return CurrentScramble::template query<ArrayFieldsType::template query<INDEX>()>();
   }
 
   // Recursive call that will forward the query from the current scramble
   // to the next one.  Enabled for all but the final scramble.
-  template <DataType INDEX, typename CurrentScramble, typename... RemainingScrambleTypes>
-  static constexpr typename std::enable_if<(sizeof...(RemainingScrambleTypes) != 0), int>::type
+  template <unsigned INDEX, typename CurrentScramble, typename... RemainingScrambleTypes>
+  static constexpr typename std::enable_if<(
+    sizeof...(RemainingScrambleTypes) != 0
+  ), unsigned>::type
   _query() {
-    return _query<CurrentScramble::template query<INDEX>(), RemainingScrambleTypes...>();
+    return _query<CurrentScramble::template query<ArrayFieldsType::template query<INDEX>()>(), RemainingScrambleTypes...>();
   }
+
+  // No scrambles at all, just query the field
+  template <unsigned INDEX>
+  static constexpr unsigned _query() {
+    return ArrayFieldsType::template query<INDEX>();
+  }
+
+  // Call for a bit that lies within a Field that is an ArrayContent.
+  // Forwards the query to the ArrayContent first, then applies the current
+  // scrambling
+
 
   // Entry point to query, sugar to make the front-end cleaner
   // by not requiring users to list the ScrambleTypes again.
-  template <DataType INDEX>
-  static constexpr int query() {
+  template <unsigned INDEX>
+  static constexpr unsigned query() {
     return _query<INDEX, ScrambleTypes...>();
   }
 

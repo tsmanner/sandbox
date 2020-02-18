@@ -3,6 +3,7 @@
 
 #include <type_traits>
 
+#include "ArrayBaseClasses.h"
 #include "ArrayField.h"
 #include "ArraySubFields.h"
 
@@ -54,9 +55,6 @@ namespace ArrayFieldsUtility {
 }  // namespace ArrayFieldsUtility
 
 
-class ArrayFieldsBase {};
-
-
 template <typename... ArrayFieldTypes>
 class ArrayFields :
   public ArrayFieldsBase,
@@ -73,7 +71,6 @@ public:
   >;
 
   static constexpr unsigned NumFields = sizeof...(ArrayFieldTypes);
-
   static const unsigned MSB = ArrayFieldType::MSB;
   static const unsigned LSB = ArrayFieldType::LSB;
   static const unsigned WIDTH = ArrayFieldType::WIDTH;
@@ -146,34 +143,157 @@ public:
     return _calculate_mask<QueryIndex, 0, ArrayFieldTypes...>() | calculate_mask<QueryIndices...>();
   }
 
-  //
-  // Set Field
-  //   Looks up the field recursively by index, shifting
-  //   and masking the data into the right set of bits.
-  //
-
   // Terminal call in template recursion for DataType
   //    mask and shift are applied and returned
   template <typename ArgType, unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
-  static typename std::enable_if<(!std::is_base_of<ArrayFieldsBase, ArgType>::value and QueryIndex < NumFields and QueryIndex == CurrentIndex), DataType>::type
+  static typename std::enable_if<(
+    !std::is_base_of<ArrayFieldsBase, ArgType>::value and
+    QueryIndex < NumFields and
+    QueryIndex == CurrentIndex
+  ), DataType>::type
   _calculate_field(const ArgType& inData) {
     return (DataType(inData) << (LSB - CurrentField::LSB)) & calculate_mask<QueryIndex>();
   }
 
-  // Terminal call in template recursion for non-DataType
+  // Terminal call in template recursion for ArrayContent instances
   //    mask and shift are applied and returned
   template <typename ArgType, unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
-  static typename std::enable_if<(std::is_base_of<ArrayFieldsBase, ArgType>::value and QueryIndex < NumFields and QueryIndex == CurrentIndex), DataType>::type
+  static typename std::enable_if<(
+    std::is_base_of<ArrayContentBase, ArgType>::value and
+    QueryIndex < NumFields and
+    QueryIndex == CurrentIndex
+  ), DataType>::type
+  _calculate_field(const ArgType& inData) {
+    return DataType(inData.getContent()) << (LSB - CurrentField::LSB);
+  }
+
+  // Terminal call in template recursion for ArrayContent instances
+  //    mask and shift are applied and returned
+  template <typename ArgType, unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static typename std::enable_if<(
+    !std::is_base_of<ArrayContentBase, ArgType>::value and
+    std::is_base_of<ArrayFieldsBase, ArgType>::value and
+    QueryIndex < NumFields and
+    QueryIndex == CurrentIndex
+  ), DataType>::type
   _calculate_field(const ArgType& inData) {
     return DataType(inData.getContent()) << (LSB - CurrentField::LSB);
   }
 
   // Non-terminal call in template recursion, just keep looking
   template <typename ArgType, unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
-  static typename std::enable_if<(QueryIndex < NumFields and QueryIndex != CurrentIndex), DataType>::type
+  static typename std::enable_if<(
+    QueryIndex < NumFields and
+    QueryIndex != CurrentIndex
+  ), DataType>::type
   _calculate_field(const ArgType& inData) {
     return _calculate_field<ArgType, QueryIndex, CurrentIndex+1, RemainingFields...>(inData);
   }
+
+
+  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(
+    QueryIndex < NumFields and
+    QueryIndex == CurrentIndex
+  ), unsigned>::type
+  _get_field_msb() {
+    return CurrentField::MSB;
+  }
+
+  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(
+    QueryIndex < NumFields and
+    QueryIndex != CurrentIndex
+  ), unsigned>::type
+  _get_field_msb() {
+    return _get_field_msb<QueryIndex, CurrentIndex+1, RemainingFields...>();
+  }
+
+  template <unsigned QueryIndex>
+  static constexpr unsigned get_field_msb() {
+    return _get_field_msb<QueryIndex, 0, ArrayFieldTypes...>();
+  }
+
+
+  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(
+    QueryIndex < NumFields and
+    QueryIndex == CurrentIndex
+  ), unsigned>::type
+  _get_field_lsb() {
+    return CurrentField::LSB;
+  }
+
+  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(
+    QueryIndex < NumFields and
+    QueryIndex != CurrentIndex
+  ), unsigned>::type
+  _get_field_lsb() {
+    return _get_field_lsb<QueryIndex, CurrentIndex+1, RemainingFields...>();
+  }
+
+  template <unsigned QueryIndex>
+  static constexpr unsigned get_field_lsb() {
+    return _get_field_lsb<QueryIndex, 0, ArrayFieldTypes...>();
+  }
+
+
+  template <unsigned BitIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(
+    CurrentIndex < NumFields and
+    get_field_msb<CurrentIndex>() <= BitIndex and
+                                      BitIndex <= get_field_lsb<CurrentIndex>()
+  ), unsigned>::type
+  _calculate_field_index() {
+    return CurrentIndex;
+  }
+
+
+  template <unsigned BitIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(
+    CurrentIndex < NumFields and
+    !(
+      get_field_msb<CurrentIndex>() <= BitIndex and
+                                        BitIndex <= get_field_lsb<CurrentIndex>()
+    )
+  ), unsigned>::type
+  _calculate_field_index() {
+    return _calculate_field_index<BitIndex, CurrentIndex+1, RemainingFields...>();
+  }
+
+
+  template <unsigned BitIndex>
+  static constexpr unsigned calculate_field_index() {
+    return _calculate_field_index<BitIndex, 0, ArrayFieldTypes...>();
+  }
+
+  //
+  // Query
+  //
+
+  template <typename FieldType, unsigned INDEX>
+  static constexpr typename std::enable_if<(
+    std::is_base_of<ArrayFieldsBase, FieldType>::value
+  ), unsigned>::type
+  _query() {
+    return FieldType::template query<INDEX - FieldType::MSB>() + FieldType::MSB;
+  }
+
+  template <typename FieldType, unsigned INDEX>
+  static constexpr typename std::enable_if<(
+    !std::is_base_of<ArrayFieldsBase, FieldType>::value
+  ), unsigned>::type
+  _query() {
+    return INDEX;
+  }
+
+  // No scrambles at all, just query the field
+  template <unsigned INDEX>
+  static constexpr unsigned query() {
+    return _query<typename std::tuple_element<calculate_field_index<INDEX>(), std::tuple<ArrayFieldTypes...>>::type, INDEX>();
+  }
+
 
   //
   // Set

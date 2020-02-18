@@ -3,6 +3,8 @@
 
 #include <type_traits>
 
+#include "ArrayBaseClasses.h"
+
 
 // ArrayFieldRange
 //   Enable class for ArrayField to allow partial template
@@ -24,11 +26,12 @@ struct ArrayFieldRange<Start, End, Val, typename std::enable_if<Val >= Start && 
 
 // Default specialization only provides a WIDTH, MSB, and LSB
 template <unsigned MSB_t, unsigned LSB_t=MSB_t, class Enable = void>
-class ArrayField {
+class ArrayField : public ArrayFieldBase {
 public:
   static constexpr unsigned WIDTH = LSB_t - MSB_t + 1;
   static const unsigned MSB = MSB_t;
   static const unsigned LSB = LSB_t;
+
 };
 
 // Range [1-8] specialization defines DataType to be uint8_t,
@@ -44,7 +47,7 @@ public:
 
   ArrayField(const uint8_t& inValue = 0): mValue(inValue) {}
   uint8_t operator=(const uint8_t& inValue) { return mValue = inValue; }
-  operator uint8_t() { return mValue; }
+  operator uint8_t() const { return mValue; }
 
 private:
   uint8_t mValue;
@@ -63,7 +66,7 @@ public:
 
   ArrayField(const uint16_t& inValue = 0): mValue(inValue) {}
   uint16_t operator=(const uint16_t& inValue) { return mValue = inValue; }
-  operator uint16_t() { return mValue; }
+  operator uint16_t() const { return mValue; }
 
 private:
   uint16_t mValue;
@@ -83,7 +86,7 @@ public:
 
   ArrayField(const uint32_t& inValue = 0): mValue(inValue) {}
   uint32_t operator=(const uint32_t& inValue) { return mValue = inValue; }
-  operator uint32_t() { return mValue; }
+  operator uint32_t() const { return mValue; }
 
 private:
   uint32_t mValue;
@@ -103,7 +106,7 @@ public:
 
   ArrayField(const uint64_t& inValue = 0): mValue(inValue) {}
   uint64_t operator=(const uint64_t& inValue) { return mValue = inValue; }
-  operator uint64_t() { return mValue; }
+  operator uint64_t() const { return mValue; }
 
 private:
   uint64_t mValue;
