@@ -27,8 +27,15 @@ namespace ArrayFieldsUtility {
   }
 
   template <typename FirstField, typename... RemainingFields>
-  constexpr unsigned calculate_msb() {
+  constexpr typename std::enable_if<(sizeof...(RemainingFields) != 0), unsigned>::type
+  calculate_msb() {
     return _calculate_msb<FirstField::MSB, RemainingFields...>();
+  }
+
+  template <typename FirstField, typename... RemainingFields>
+  constexpr typename std::enable_if<(sizeof...(RemainingFields) == 0), unsigned>::type
+  calculate_msb() {
+    return FirstField::MSB;
   }
 
   //
@@ -48,8 +55,15 @@ namespace ArrayFieldsUtility {
   }
 
   template <typename FirstField, typename... RemainingFields>
-  constexpr unsigned calculate_lsb() {
+  constexpr typename std::enable_if<(sizeof...(RemainingFields) != 0), unsigned>::type
+  calculate_lsb() {
     return _calculate_lsb<FirstField::LSB, RemainingFields...>();
+  }
+
+  template <typename FirstField, typename... RemainingFields>
+  constexpr typename std::enable_if<(sizeof...(RemainingFields) == 0), unsigned>::type
+  calculate_lsb() {
+    return FirstField::LSB;
   }
 
 }  // namespace ArrayFieldsUtility
@@ -239,11 +253,31 @@ public:
   }
 
 
+  // Field width calculation
+  template <unsigned QueryIndex>
+  static constexpr unsigned get_field_width() {
+    return _get_field_lsb<QueryIndex, 0, ArrayFieldTypes...>() - _get_field_msb<QueryIndex, 0, ArrayFieldTypes...>() + 1;
+  }
+
+
+  //
+  // Calculate Field Index
+  //    Template recursive bit index to field index calculation
+  //
+  template <unsigned BitIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(
+    CurrentIndex == NumFields
+  ), unsigned>::type
+  _calculate_field_index() {
+    return CurrentIndex;
+  }
+
+
   template <unsigned BitIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
   static constexpr typename std::enable_if<(
     CurrentIndex < NumFields and
-    get_field_msb<CurrentIndex>() <= BitIndex and
-                                      BitIndex <= get_field_lsb<CurrentIndex>()
+    get_field_msb<CurrentIndex>() <= BitIndex
+    and                              BitIndex <= get_field_lsb<CurrentIndex>()
   ), unsigned>::type
   _calculate_field_index() {
     return CurrentIndex;
@@ -254,8 +288,8 @@ public:
   static constexpr typename std::enable_if<(
     CurrentIndex < NumFields and
     !(
-      get_field_msb<CurrentIndex>() <= BitIndex and
-                                        BitIndex <= get_field_lsb<CurrentIndex>()
+      get_field_msb<CurrentIndex>() <= BitIndex
+      and                              BitIndex <= get_field_lsb<CurrentIndex>()
     )
   ), unsigned>::type
   _calculate_field_index() {
@@ -290,8 +324,39 @@ public:
 
   // No scrambles at all, just query the field
   template <unsigned INDEX>
-  static constexpr unsigned query() {
+  static constexpr typename std::enable_if<(calculate_field_index<INDEX>() != NumFields), unsigned>::type
+  query() {
     return _query<typename std::tuple_element<calculate_field_index<INDEX>(), std::tuple<ArrayFieldTypes...>>::type, INDEX>();
+  }
+
+
+  // No scrambles at all, just query the field
+  template <unsigned INDEX>
+  static constexpr typename std::enable_if<(calculate_field_index<INDEX>() == NumFields), unsigned>::type
+  query() {
+    return INDEX;
+  }
+
+
+  //
+  // Template recursive apply
+  //    Specialized with a function to call on each
+  //    index of this ArrayFields type
+  //
+
+  template < template <typename, unsigned> typename FunctionType, unsigned I>
+  typename std::enable_if<(I > LSB)>::type
+  _apply() {}
+
+  template < template <typename, unsigned> typename FunctionType, unsigned I>
+  typename std::enable_if<(I <= LSB)>::type
+  _apply() {
+    FunctionType<ArrayFields<ArrayFieldTypes...>, I>();
+  }
+
+  template <typename FunctionType>
+  void apply() {
+    _apply<FunctionType, MSB>();
   }
 
 
