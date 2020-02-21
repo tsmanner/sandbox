@@ -339,28 +339,6 @@ public:
 
 
   //
-  // Template recursive apply
-  //    Specialized with a function to call on each
-  //    index of this ArrayFields type
-  //
-
-  template < template <typename, unsigned> typename FunctionType, unsigned I>
-  typename std::enable_if<(I > LSB)>::type
-  _apply() {}
-
-  template < template <typename, unsigned> typename FunctionType, unsigned I>
-  typename std::enable_if<(I <= LSB)>::type
-  _apply() {
-    FunctionType<ArrayFields<ArrayFieldTypes...>, I>();
-  }
-
-  template <typename FunctionType>
-  void apply() {
-    _apply<FunctionType, MSB>();
-  }
-
-
-  //
   // Set
   //   Recursively OR reduces the result of applying each
   //   field mask and shift to the input arguments, in
