@@ -1,195 +1,146 @@
 #include <bitset>
+#include <functional>
 #include <iostream>
 #include <iomanip>
 #include <limits>
+#include <sstream>
+#include <set>
 #include <type_traits>
 #include <unordered_set>
+#include <utility>
 using std::bitset;
 using std::cout;
 using std::dec;
 using std::endl;
 using std::hex;
+using std::ostream;
+using std::pair;
+using std::set;
 using std::setw;
 using std::setfill;
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::placeholders::_3;
 
 #include "ArrayContent.h"
 #include "ArrayField.h"
 #include "ArrayFields.h"
+#include "ArrayReduce.h"
 #include "ArraySubFields.h"
 #include "../BitManipulation/Interleave.h"
 #include "../BitManipulation/Reverse.h"
+#include "../BitManipulation/Rotate.h"
 
 
 
+
+struct BitTranslation {
+  unsigned origin;
+  unsigned destination;
+
+  //  Equal
+  //  Not Equal
+  //  Less
+  //  Less or Equal
+  //  Greater
+  //  Greater or Equal
+
+  bool origin_eq(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.origin == rhs.origin; }
+  bool origin_ne(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.origin != rhs.origin; }
+  bool origin_lt(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.origin <  rhs.origin; }
+  bool origin_le(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.origin <= rhs.origin; }
+  bool origin_gt(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.origin >  rhs.origin; }
+  bool origin_ge(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.origin >= rhs.origin; }
+
+  bool destination_eq(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.destination == rhs.destination; }
+  bool destination_ne(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.destination != rhs.destination; }
+  bool destination_lt(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.destination <  rhs.destination; }
+  bool destination_le(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.destination <= rhs.destination; }
+  bool destination_gt(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.destination >  rhs.destination; }
+  bool destination_ge(const BitTranslation& lhs, const BitTranslation& rhs) { return lhs.destination >= rhs.destination; }
+
+};
+
+bool operator<(const BitTranslation& lhs, const BitTranslation& rhs) {
+  return lhs.destination < rhs.destination;
+  // return lhs.origin < rhs.origin;
+}
 
 
 int main() {
-  using EntryType = ArrayContent<
+  using UnrotatedContentType = BufferedArrayContent<
     ArrayFields<
-      ArrayField<0>,     // 1 bit
-      ArrayField<1,  2>, // 2 bits
-      ArrayField<3,  5>, // 3 bits
-      ArrayField<6, 11>  // 6 bits
+      ArrayField< 0, 59>
     >,
-    Interleave<0, 11, 2>
-  >;
-  using ContentType = ArrayContent<
-    ArrayFields<
-      ArraySubFields< 0, 11, EntryType>,
-      ArraySubFields<12, 23, EntryType>
-    >,
-    Reverse<12, 23>
+    Interleave<0, 55, 7>
   >;
 
-  auto array = ContentType(
-    EntryType(0b1, 0b11, 0b111, 0b000000),
-    EntryType(0b1, 0b11, 0b111, 0b000000)
-  );
-  cout << "Array[0] = " << bitset<12>(array.getField<0>()) << endl;
-  // array.getContent() == 0b111111000000111111000000;
-  // array.getScrambledContent() == 0b101010101010010101010101;
+  using RotatedContentType = BufferedArrayContent<
+    ArrayFields<
+      ArrayField< 0, 59>
+    >,
+    Interleave<0, 55, 7>,
+    Rotate<31, 59, RotateRight, 4>,
+    Rotate<32, 34, RotateLeft, 1>
+  >;
 
-  // using Entry = ArrayContent<
-  //   ArrayFields<
-  //     ArrayField<0, 3>,
-  //     ArrayField<4 ,7>
-  //     // ArrayField<7, 15>,
-  //     // ArrayField<16, 19>
-  //   >,
-  //   Interleave<0, 7, 2>
-  // >;
+  {
+    std::stringstream ss1;
+    std::stringstream ss2;
+    auto s = set<BitTranslation>();
 
-  // using ArrayType = BufferedArrayContent<
-  //   ArrayFields<
-  //     ArrayField<0>,
-  //     ArraySubFields< 1,  8, Entry>,
-  //     ArraySubFields< 9, 16, Entry>,
-  //     ArraySubFields<17, 24, Entry>
-  //   >//,
-  //   // Interleave<0, 15, 2>
-  // >;
+    reduce<UnrotatedContentType>(
+      [](
+        const unsigned& origin,
+        const unsigned& destination,
+        set<BitTranslation>& inSet
+      ) {
+        auto t = BitTranslation();
+        t.origin = origin;
+        t.destination = destination;
+        inSet.insert(t);
+      },
+      s
+    );
 
-  // auto array = ArrayType();
-  // // array.setContent(0b10101010101010101010);
+    for (auto& trans : s) {
+      ss1 << setw(3) << trans.origin;
+      ss2 << setw(3) << trans.destination;
+    }
 
-  // cout
-  //   << "ArrayType<"
-  //   << ArrayType::MSB
-  //   << ", "
-  //   << ArrayType::LSB
-  //   << ">"
-  //   << endl
-  //   << "  Size: " << sizeof(ArrayType::DataType) << endl
-  //   << "  Width: " << ArrayType::WIDTH << endl
-  //   << "  NumFields: " << ArrayType::NumFields << endl
-  //   << hex
-  //   << "  mask<0>: " << ArrayType::calculate_mask<0>() << endl
-  //   << "  mask<1>: " << ArrayType::calculate_mask<1>() << endl
-  //   // << "  mask<2>: " << ArrayType::calculate_mask<2>() << endl
-  //   // << "  mask<3>: " << ArrayType::calculate_mask<3>() << endl
-  //   ;
+    cout << ss1.str() << endl;
+    cout << ss2.str() << endl;
+  }
 
-  // cout << hex << Entry(1, 1).getContent() << endl;
+  cout << endl;
 
-  // array = ArrayType(1, Entry(0xf, 0), Entry::calculate_content(0, 0), Entry::calculate_content(1, 1));
-  // cout
-  //   << "ArrayInstance.mContent = 0x"
-  //   << hex << setfill('0')
-  //   << setw((ArrayType::WIDTH/4) + ((ArrayType::WIDTH % 4) ? 1 : 0))
-  //   << array.getContent()
-  //   << dec << setfill(' ')
-  //   << endl
-  //   << "ArrayInstance.getField<0>() = "
-  //   << hex
-  //   << +array.getField<0>()
-  //   << endl
-  //   << "ArrayInstance.getField<1>().getField<0>() = "
-  //   << hex
-  //   << +array.getField<1>().getField<0>()
-  //   << endl
-  //   ;
+  {
+    std::stringstream ss1;
+    std::stringstream ss2;
+    auto s = set<BitTranslation>();
 
-  // array.set(
-  //   0b11111,      // Field 0 - < 2: 6>
-  //   0b11,         // Field 1 - < 0: 1>
-  //   0b100000000,  // Field 2 - < 7:15>
-  //   0b0000        // Field 3 - <16:19>
-  // );
+    reduce<RotatedContentType>(
+      [](
+        const unsigned& origin,
+        const unsigned& destination,
+        set<BitTranslation>& inSet
+      ) {
+        auto t = BitTranslation();
+        t.origin = origin;
+        t.destination = destination;
+        inSet.insert(t);
+      },
+      s
+    );
 
-  // cout
-  //   << "query< 0>: " << ArrayType::query< 0>() << endl
-  //   << "query< 1>: " << ArrayType::query< 1>() << endl
-  //   << "query< 2>: " << ArrayType::query< 2>() << endl
-  //   << "query< 3>: " << ArrayType::query< 3>() << endl
-  //   << "query< 4>: " << ArrayType::query< 4>() << endl
-  //   << "query< 5>: " << ArrayType::query< 5>() << endl
-  //   << "query< 6>: " << ArrayType::query< 6>() << endl
-  //   << "query< 7>: " << ArrayType::query< 7>() << endl
-  //   << "query< 8>: " << ArrayType::query< 8>() << endl
-  //   << "query< 9>: " << ArrayType::query< 9>() << endl
-  //   << "query<10>: " << ArrayType::query<10>() << endl
-  //   << "query<11>: " << ArrayType::query<11>() << endl
-  //   << "query<12>: " << ArrayType::query<12>() << endl
-  //   << "query<13>: " << ArrayType::query<13>() << endl
-  //   << "query<14>: " << ArrayType::query<14>() << endl
-  //   << "query<15>: " << ArrayType::query<15>() << endl
-  //   << "query<16>: " << ArrayType::query<16>() << endl
-  //   << "query<17>: " << ArrayType::query<17>() << endl
-  //   << "query<18>: " << ArrayType::query<18>() << endl
-  //   << "query<19>: " << ArrayType::query<19>() << endl
-  //   << endl;
+    for (auto& trans : s) {
+      ss1 << setw(3) << trans.origin;
+      ss2 << setw(3) << trans.destination;
+    }
 
-  // cout
-  //   << "ArrayInstance.getContent   = 0b"
-  //   << hex << setfill('0')
-  //   << std::bitset<20>(array.getContent())
-  //   << dec << setfill(' ')
-  //   << endl;
-
-  // cout
-  //   << "ArrayInstance.getScrambled = 0b"
-  //   << hex << setfill('0')
-  //   << std::bitset<20>(array.getScrambledContent())
-  //   << dec << setfill(' ')
-  //   << endl;
-
-  // cout
-  //   << hex
-  //   << "ArrayInstance.getField<0> = " << array.getField<0>() << endl
-  //   << "ArrayInstance.getField<1> = " << array.getField<1>() << endl
-  //   << "ArrayInstance.getField<2> = " << array.getField<2>() << endl
-  //   << "ArrayInstance.getField<3> = " << array.getField<3>() << endl
-  //   ;
-
-  // cout << endl << "ArrayInstance.setField<0>(0x1ff)" << endl;
-  // array.setField<2>(0x1f0);
-  // cout
-  //   << "ArrayInstance.getContent   = 0b"
-  //   << hex << setfill('0')
-  //   << std::bitset<20>(array.getContent())
-  //   << dec << setfill(' ')
-  //   << endl;
-
-  // cout
-  //   << "ArrayInstance.getScrambled = 0b"
-  //   << hex << setfill('0')
-  //   << std::bitset<20>(array.getScrambledContent())
-  //   << dec << setfill(' ')
-  //   << endl;
-
-  // cout
-  //   << "ArrayInstance.unscramble   = 0b"
-  //   << hex << setfill('0')
-  //   << std::bitset<20>(ArrayType::unscramble(array.getScrambledContent()))
-  //   << dec << setfill(' ')
-  //   << endl;
-
-  // cout
-  //   << hex
-  //   << "ArrayInstance.getField<0> = " << array.getField<0>() << endl
-  //   << "ArrayInstance.getField<1> = " << array.getField<1>() << endl
-  //   << "ArrayInstance.getField<2> = " << array.getField<2>() << endl
-  //   << "ArrayInstance.getField<3> = " << array.getField<3>() << endl
-  //   ;
+    cout << ""
+      << ss1.str() << endl
+      << ss2.str() << endl;
+  }
 
 }

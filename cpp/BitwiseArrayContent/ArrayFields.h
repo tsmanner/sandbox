@@ -1,6 +1,8 @@
 #ifndef ArrayFields_h
 #define ArrayFields_h
 
+#include <limits>
+#include <tuple>
 #include <type_traits>
 
 #include "ArrayBaseClasses.h"
