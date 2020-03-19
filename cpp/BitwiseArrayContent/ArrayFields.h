@@ -180,7 +180,8 @@ public:
     QueryIndex == CurrentIndex
   ), DataType>::type
   _calculate_field(const ArgType& inData) {
-    return DataType(inData.getContent()) << (LSB - CurrentField::LSB);
+    return _calculate_field<typename ArgType::DataType, QueryIndex, CurrentIndex, CurrentField, RemainingFields...>(inData.getContent());
+    // return DataType(inData.getContent()) << (LSB - CurrentField::LSB);
   }
 
   // Terminal call in template recursion for ArrayContent instances
@@ -193,7 +194,8 @@ public:
     QueryIndex == CurrentIndex
   ), DataType>::type
   _calculate_field(const ArgType& inData) {
-    return DataType(inData.getContent()) << (LSB - CurrentField::LSB);
+    return _calculate_field<typename ArgType::DataType, QueryIndex, CurrentIndex, CurrentField, RemainingFields...>(inData.getContent());
+    // return DataType(inData.getContent()) << (LSB - CurrentField::LSB);
   }
 
   // Non-terminal call in template recursion, just keep looking
@@ -206,6 +208,10 @@ public:
     return _calculate_field<ArgType, QueryIndex, CurrentIndex+1, RemainingFields...>(inData);
   }
 
+
+  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(QueryIndex == NumFields), unsigned>::type
+  _get_field_msb() { return 0; }
 
   template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
   static constexpr typename std::enable_if<(
@@ -230,6 +236,10 @@ public:
     return _get_field_msb<QueryIndex, 0, ArrayFieldTypes...>();
   }
 
+
+  template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  static constexpr typename std::enable_if<(QueryIndex == NumFields), unsigned>::type
+  _get_field_lsb() { return 0; }
 
   template <unsigned QueryIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
   static constexpr typename std::enable_if<(
@@ -266,7 +276,7 @@ public:
   // Calculate Field Index
   //    Template recursive bit index to field index calculation
   //
-  template <unsigned BitIndex, unsigned CurrentIndex, typename CurrentField, typename... RemainingFields>
+  template <unsigned BitIndex, unsigned CurrentIndex>
   static constexpr typename std::enable_if<(
     CurrentIndex == NumFields
   ), unsigned>::type
@@ -324,7 +334,7 @@ public:
     return INDEX;
   }
 
-  // No scrambles at all, just query the field
+  // Lookup and query the relevant field
   template <unsigned INDEX>
   static constexpr typename std::enable_if<(calculate_field_index<INDEX>() != NumFields), unsigned>::type
   query() {
@@ -332,7 +342,7 @@ public:
   }
 
 
-  // No scrambles at all, just query the field
+  // No matching field, just return the INDEX
   template <unsigned INDEX>
   static constexpr typename std::enable_if<(calculate_field_index<INDEX>() == NumFields), unsigned>::type
   query() {
