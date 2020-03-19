@@ -181,7 +181,6 @@ public:
   ), DataType>::type
   _calculate_field(const ArgType& inData) {
     return _calculate_field<typename ArgType::DataType, QueryIndex, CurrentIndex, CurrentField, RemainingFields...>(inData.getContent());
-    // return DataType(inData.getContent()) << (LSB - CurrentField::LSB);
   }
 
   // Terminal call in template recursion for ArrayContent instances
@@ -195,7 +194,6 @@ public:
   ), DataType>::type
   _calculate_field(const ArgType& inData) {
     return _calculate_field<typename ArgType::DataType, QueryIndex, CurrentIndex, CurrentField, RemainingFields...>(inData.getContent());
-    // return DataType(inData.getContent()) << (LSB - CurrentField::LSB);
   }
 
   // Non-terminal call in template recursion, just keep looking

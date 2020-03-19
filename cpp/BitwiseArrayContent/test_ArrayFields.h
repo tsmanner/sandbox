@@ -123,19 +123,14 @@ TEST_CASE("ArrayFields - 10 bits") {
 
 TEST_CASE("ArrayFields - 65 bits") {
   using FieldsType = ArrayFields<
-    ArrayField<0>,    // 1 bit
-    ArrayField<1, 2>, // 2 bits
-    ArrayField<4, 5>, // 3 bits
-    ArrayField<6, 9>  // 4 bits
+    ArrayField< 0>,  // 1 bit
+    ArrayField<63>   // 1 bits
   >;
   SECTION("Value Construction") {
-    auto fields = FieldsType(1, 2, 7, 4);
-    CHECK(fields.getContent() == 0b1100110100);
-    CHECK(uint16_t(fields) == 0b1100110100);
+    auto fields = FieldsType(1, 1);
+    CHECK(fields.getContent() == 0x8000000000000001);
     CHECK(fields.getField<0>() == 0b1);
-    CHECK(fields.getField<1>() == 0b10);
-    CHECK(fields.getField<2>() == 0b11);
-    CHECK(fields.getField<3>() == 0b0100);
+    CHECK(fields.getField<1>() == 0b1);
   }
 
 }
