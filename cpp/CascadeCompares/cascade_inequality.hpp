@@ -18,7 +18,7 @@ cascade_inequality(const ObjectType& lhs, const ObjectType& rhs, CurrentGetterTy
 template <template <typename> class InequalityType, typename ObjectType, typename CurrentGetterType, typename... RemainingGetterTypes>
 constexpr typename std::enable_if<(sizeof...(RemainingGetterTypes) > 0), bool>::type
 cascade_inequality(const ObjectType& lhs, const ObjectType& rhs, CurrentGetterType inCurrentGetter, RemainingGetterTypes... inRemainingGetters) {
-  return ((lhs.*inCurrentGetter)() == (rhs.*inCurrentGetter)()) ? (cascade_inequality<InequalityType>(lhs, rhs, inRemainingGetters...)) : (InequalityType<typename std::result_of<CurrentGetterType(ObjectType*)>::type>()((lhs.*inCurrentGetter)(), (rhs.*inCurrentGetter)()));
+  return ((lhs.*inCurrentGetter)() == (rhs.*inCurrentGetter)()) ? (cascade_inequality<InequalityType>(lhs, rhs, inRemainingGetters...)) : (cascade_inequality<InequalityType>(lhs, rhs, inCurrentGetter));
 }
 
 

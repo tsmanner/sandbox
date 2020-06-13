@@ -9,7 +9,7 @@
 template <typename ObjectType, typename CurrentGetterType, typename... RemainingGetterTypes>
 constexpr typename std::enable_if<(sizeof...(RemainingGetterTypes) == 0), bool>::type
 cascade_equality(const ObjectType& lhs, const ObjectType& rhs, CurrentGetterType inCurrentGetter, RemainingGetterTypes... inRemainingGetters) {
-  return std::equal_to<typename std::result_of<CurrentGetterType(ObjectType*)>::type>()((lhs.*inCurrentGetter)(), (rhs.*inCurrentGetter)());
+  return (lhs.*inCurrentGetter)() == (rhs.*inCurrentGetter)();
 }
 
 // Recursive cascade_equality call
@@ -17,7 +17,7 @@ cascade_equality(const ObjectType& lhs, const ObjectType& rhs, CurrentGetterType
 template <typename ObjectType, typename CurrentGetterType, typename... RemainingGetterTypes>
 constexpr typename std::enable_if<(sizeof...(RemainingGetterTypes) > 0), bool>::type
 cascade_equality(const ObjectType& lhs, const ObjectType& rhs, CurrentGetterType inCurrentGetter, RemainingGetterTypes... inRemainingGetters) {
-  return std::equal_to<typename std::result_of<CurrentGetterType(ObjectType*)>::type>()((lhs.*inCurrentGetter)(), (rhs.*inCurrentGetter)()) and cascade_equality(lhs, rhs, inRemainingGetters...);
+  return cascade_equality(lhs, rhs, inCurrentGetter) and cascade_equality(lhs, rhs, inRemainingGetters...);
 }
 
 
